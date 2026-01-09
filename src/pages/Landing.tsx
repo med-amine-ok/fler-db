@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
+import { ALLOWED_EMAILS } from '../lib/constants';
 
 export const Landing = () => {
   const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      navigate('/auth', { state: { email } });
+    setError(null);
+
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    if (ALLOWED_EMAILS.includes(normalizedEmail)) {
+      navigate('/auth', { state: { email: normalizedEmail } });
+    } else {
+      setError('Sorry, this email is not authorized to access the system.');
     }
   };
 
@@ -23,6 +31,13 @@ export const Landing = () => {
           Manage your events, teams, and progress seamlessly.
         </p>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-3 animate-shake">
+            <AlertCircle size={20} className="shrink-0" />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="text-left">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -33,9 +48,12 @@ export const Landing = () => {
               id="email"
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-gray-50/50"
-              placeholder="name@company.com"
+              placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError(null);
+              }}
             />
           </div>
           
@@ -47,10 +65,6 @@ export const Landing = () => {
           </button>
         </form>
       </div>
-      
-      <p className="mt-8 text-gray-400 text-sm">
-        Student Organization Management System
-      </p>
     </div>
   );
 };

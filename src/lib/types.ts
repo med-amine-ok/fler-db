@@ -1,9 +1,10 @@
 export type User = {
     id: string;
-    email: string;
-    name: string;
-    role: 'admin' | 'user';
-    teamId?: string;
+    email: string; // from auth.users or profiles
+    name: string; // profiles.full_name
+    role: 'admin' | 'user'; // defaulting to user for now?
+    teamId?: string; // profiles.team
+    // Computed/Mock stats
     contactCount: number;
     companyCount: number;
     eventCount: number;
@@ -11,12 +12,12 @@ export type User = {
 };
 
 export type Event = {
-    id: string;
+    id: string | number;
     name: string;
-    date: string;
-    status: 'ongoing' | 'ongoing' | 'ongoing';
-    description?: string;
-    logo?: string;
+    date: string; // Not in DB, need to mock/default
+    status: 'planned' | 'ongoing' | 'finished' | 'upcoming' | 'completed'; // Merging UI and DB values
+    description?: string; // Not in DB
+    logo?: string; // Not in DB
 };
 
 export type Team = {
@@ -27,17 +28,22 @@ export type Team = {
 };
 
 export type Company = {
-    id: string;
+    id: string | number;
     name: string;
-    status: 'contacted' | 'negotiating' | 'signed' | 'rejected';
-    eventId: string;
-    assignedTo?: string;
+    status: 'contacted' | 'pending' | 'signed' | 'rejected' | 'negotiating';
+    eventId?: string; // Optional for mock data compatibility
+    assignedTo?: string; // profiles.full_name
+    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing';
+    notes?: string;
 };
 
 export type Resource = {
-    id: string;
+    id: string | number;
     name: string;
-    type: 'hotel' | 'goodie' | 'food';
-    eventId: string;
-    status: 'available' | 'booked';
+    type: 'hotel' | 'salle' | 'food' | 'goodies' | 'goodie'; // 'goodie' in UI, 'goodies' in DB
+    status: string; // DB is text
+    eventId?: string; // Opt for mock
+    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing';
+    assignedTo?: string;
+    notes?: string;
 };

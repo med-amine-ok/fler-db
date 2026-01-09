@@ -1,12 +1,63 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, ArrowRight, CheckCircle2, TrendingUp } from 'lucide-react';
-import { mockEvents, mockTeams, mockUser } from '../lib/mockData';
+import { Calendar, Users, ArrowRight, CheckCircle2, TrendingUp, Loader2 } from 'lucide-react';
+import { mockTeams } from '../lib/mockData';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { supabase } from '../lib/supabase';
+import type { Event } from '../lib/types';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    contactCount: 0,
+    eventCount: 0,
+    completionRate: 85 // Mocked for now or calculate based on status
+  });
+  const [recentEvents, setRecentEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch Stats
+      const { count: contactCount } = await supabase.from('companies').select('*', { count: 'exact', head: true });
+      const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
+      
+      // Fetch Recent Events
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      setStats({
+        contactCount: contactCount || 0,
+        eventCount: eventCount || 0,
+        completionRate: 85
+      });
+
+      if (eventsData) {
+         setRecentEvents((eventsData as any[]).map(e => ({
+            id: e.id,
+            name: e.name,
+            date: e.created_at,
+            status: e.status as any || 'planned',
+            description: '',
+            logo: undefined
+         })));
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTeamClick = (teamId: string) => {
     const team = mockTeams.find(t => t.id === teamId);
@@ -21,6 +72,10 @@ export const Home = () => {
     }
   };
 
+  if (loading) {
+     return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>;
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Stats Overview */}
@@ -32,7 +87,7 @@ export const Home = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Total Contacts</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{mockUser.contactCount}</h3>
+              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.contactCount}</h3>
               <div className="flex items-center gap-1 mt-2 text-emerald-500 text-sm font-medium">
                 <TrendingUp size={14} /> <span>+12% this week</span>
               </div>
@@ -50,7 +105,7 @@ export const Home = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Target Events</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{mockUser.eventCount}</h3>
+              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.eventCount}</h3>
               <div className="flex items-center gap-1 mt-2 text-emerald-500 text-sm font-medium">
                 <TrendingUp size={14} /> <span>On track</span>
               </div>
@@ -68,9 +123,9 @@ export const Home = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Completion Rate</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">85%</h3>
+              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.completionRate}%</h3>
                <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3 max-w-[100px]">
-                <div className="bg-text h-1.5 rounded-full" style={{ width: '85%' }}></div>
+                <div className="bg-text h-1.5 rounded-full" style={{ width: `${stats.completionRate}%` }}></div>
                </div>
             </div>
             <div className="p-3 bg-text text-white rounded-xl shadow-lg shadow-gray-900/20">
@@ -121,7 +176,7 @@ export const Home = () => {
         <section>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold flex items-center gap-2 text-text">
-               ongoing Events
+               Ongoing Events
             </h2>
             <Button variant="ghost" size="sm" onClick={() => navigate('/events')}>
               View all
@@ -129,13 +184,13 @@ export const Home = () => {
           </div>
 
           <div className="space-y-4">
-             {mockEvents.slice(0, 3).map((event) => (
+             {recentEvents.length > 0 ? recentEvents.map((event) => (
               <Card key={event.id} className="p-4 flex items-center gap-4">
                  <div className="h-14 w-14 rounded-xl shrink-0 bg-white border border-gray-100 overflow-hidden flex items-center justify-center p-1">
                    {event.logo ? (
                       <img src={event.logo} alt={event.name} className="w-full h-full object-contain" />
                    ) : (
-                      <span className="font-bold text-gray-300 text-xs">NO IMG</span>
+                      <span className="font-bold text-gray-300 text-xs text-center leading-tight">{event.name.substring(0,2).toUpperCase()}</span>
                    )}
                  </div>
                  <div className="flex-1 min-w-0">
@@ -161,7 +216,11 @@ export const Home = () => {
                     </div>
                  </div>
               </Card>
-            ))}
+            )) : (
+                <div className="text-center py-10 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                    No events found. Start by creating one!
+                </div>
+            )}
           </div>
         </section>
       </div>

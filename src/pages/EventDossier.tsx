@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, Save, Check } from 'lucide-react';
+import { ArrowLeft, Save, Check } from 'lucide-react';
 
 export const EventDossier = () => {
   const { id } = useParams();

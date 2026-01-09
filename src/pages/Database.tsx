@@ -1,65 +1,118 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, MoreHorizontal, Download, Plus, Database as DatabaseIcon } from 'lucide-react';
-import { mockEvents, mockCompanies } from '../lib/mockData';
+import { Search, Filter, MoreHorizontal, Download, Plus, Database as DatabaseIcon, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { supabase } from '../lib/supabase';
 
-type Tab = 'Users' | 'Events' | 'Companies' | 'Hotels' | 'Goodies' | 'Foods';
+type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods';
 
 export const Database = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('Companies');
   const [searchTerm, setSearchTerm] = useState('');
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const tabs: Tab[] = ['Users', 'Events', 'Companies', 'Hotels', 'Goodies', 'Foods'];
+  const tabs: Tab[] = [ 'Companies', 'Hotels', 'Goodies', 'Foods'];
 
-  const getData = () => {
-    switch(activeTab) {
-      case 'Events': return mockEvents;
-      case 'Companies': return mockCompanies;
-      default: return [];
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    let query: any;
+    
+    try {
+        switch(activeTab) {
+            
+            case 'Companies':
+                query = supabase.from('companies').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                break;
+            case 'Hotels':
+                query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'hotel').order('created_at', { ascending: false });
+                break;
+            case 'Foods':
+                query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'food').order('created_at', { ascending: false });
+                break;
+            case 'Goodies':
+                query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'goodies').order('created_at', { ascending: false });
+                break;
+            
+            default:
+                setLoading(false);
+                return;
+        }
+
+        const { data: result, error } = await query;
+        if (error) throw error;
+        setData(result || []);
+
+    } catch (e) {
+        console.error("Error fetching database:", e);
+    } finally {
+        setLoading(false);
     }
   };
 
-  const data = getData();
+  const filteredData = data.filter(item => 
+    JSON.stringify(item).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAdd = () => {
+      // Redirect to specific add forms based on tab
+      if (activeTab === 'Companies') navigate('/teams/sponsoring/global/add');
+      else if (['Hotels', 'Foods', 'Goodies'].includes(activeTab)) navigate('/teams/logistics/add');
+      else navigate(`/database/add?type=${activeTab}`);
+  };
 
   const renderTableHeaders = () => {
     const commonClasses = "text-left py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider";
+    
     if (activeTab === 'Companies') {
       return (
         <tr className="bg-gray-50/50 border-b border-gray-100">
           <th className={commonClasses}>Company Name</th>
           <th className={commonClasses}>Status</th>
+          <th className={commonClasses}>Contact Method</th>
+          <th className={commonClasses}>Contact</th>
           <th className={commonClasses}>Assigned To</th>
           <th className="text-right py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Actions</th>
         </tr>
       );
     }
-    if (activeTab === 'Events') {
-      return (
-        <tr className="bg-gray-50/50 border-b border-gray-100">
-           <th className={commonClasses}>Event Name</th>
-           <th className={commonClasses}>Date</th>
-           <th className={commonClasses}>Status</th>
-           <th className="text-right py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Actions</th>
-        </tr>
-      );
-    }
+    
+    // Logistics (Hotels, Foods, Goodies)
     return (
-      <tr className="bg-gray-50 text-left">
-        <th className="py-4 px-6 text-gray-400">No View Configured</th>
+      <tr className="bg-gray-50/50 border-b border-gray-100">
+        <th className={commonClasses}>Name</th>
+        <th className={commonClasses}>Status</th>
+        <th className={commonClasses}>Type</th>
+        <th className={commonClasses}>Contact</th>
+        <th className={commonClasses}>Assigned To</th>
+        <th className="text-right py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Actions</th>
       </tr>
     );
   };
 
   const renderTableRows = () => {
-    if (data.length === 0) {
+    if (loading) {
+        return (
+            <tr>
+                <td colSpan={6} className="text-center py-16">
+                    <Loader2 className="animate-spin mx-auto text-primary" size={30} />
+                </td>
+            </tr>
+        )
+    }
+
+    if (filteredData.length === 0) {
       return (
         <tr>
-          <td colSpan={4} className="text-center py-16 text-gray-400">
+          <td colSpan={6} className="text-center py-16 text-gray-400">
              <div className="flex flex-col items-center gap-2">
                 <DatabaseIcon size={40} className="opacity-20" />
                 <p>No records found for {activeTab}</p>
@@ -72,19 +125,23 @@ export const Database = () => {
     const rowClasses = "border-b border-gray-50 hover:bg-gray-50/80 transition-colors group";
     const cellClasses = "py-4 px-6 text-sm text-gray-600 group-hover:text-gray-900";
 
+   
     if (activeTab === 'Companies') {
-      return (data as any[]).map((item) => (
+      return (filteredData as any[]).map((item) => (
          <tr key={item.id} className={rowClasses}>
             <td className={clsx(cellClasses, "font-medium text-text")}>{item.name}</td>
             <td className={cellClasses}>
               <Badge variant={
                 item.status === 'signed' ? 'success' : 
-                item.status === 'negotiating' ? 'warning' : 'default'
+                item.status === 'negotiating' ? 'warning' : 
+                item.status === 'rejected' ? 'error' : 'default'
               }>
-                {item.status}
+                {item.status || 'Pending'}
               </Badge>
             </td>
-            <td className={cellClasses}>{item.assignedTo || <span className="text-gray-300 italic">Unassigned</span>}</td>
+            <td className={clsx(cellClasses, "capitalize")}>{item.contact_method || '-'}</td>
+             <td className={cellClasses}>{item.contact || '-'}</td>
+            <td className={cellClasses}>{item.profiles?.full_name || <span className="text-gray-300 italic">Unassigned</span>}</td>
             <td className="py-4 px-6 text-right">
               <button className="p-1.5 hover:bg-gray-200 rounded-md text-gray-400 hover:text-text transition-all">
                  <MoreHorizontal size={16} />
@@ -94,31 +151,27 @@ export const Database = () => {
       ));
     }
 
-    if (activeTab === 'Events') {
-      return (data as any[]).map((item) => (
+   
+
+    // Logistics
+    return (filteredData as any[]).map((item) => (
          <tr key={item.id} className={rowClasses}>
-            <td className={clsx(cellClasses, "font-medium text-text")}>
-               <div className="flex items-center gap-3">
-                 {item.logo && <img src={item.logo} className="w-6 h-6 object-contain rounded-md" />}
-                 {item.name}
-               </div>
-            </td>
-             <td className={cellClasses}>{new Date(item.date).toLocaleDateString()}</td>
+            <td className={clsx(cellClasses, "font-medium text-text")}>{item.name}</td>
             <td className={cellClasses}>
-               <Badge variant={item.status === 'ongoing' ? 'default' : 'success'}>
-                {item.status}
+               <Badge variant={item.status === 'booked' ? 'success' : item.status === 'available' ? 'default' : 'warning'}>
+                {item.status || 'Pending'}
               </Badge>
             </td>
+            <td className={clsx(cellClasses, "capitalize")}>{item.type}</td>
+            <td className={cellClasses}>{item.contact || '-'}</td>
+            <td className={cellClasses}>{item.profiles?.full_name || <span className="text-gray-300 italic">Unassigned</span>}</td>
             <td className="py-4 px-6 text-right">
                <button className="p-1.5 hover:bg-gray-200 rounded-md text-gray-400 hover:text-text transition-all">
                  <MoreHorizontal size={16} />
-              </button>
+               </button>
             </td>
          </tr>
-      ));
-    }
-
-    return null;
+    ));
   }
 
   return (
@@ -132,8 +185,8 @@ export const Database = () => {
            <Button variant="outline" className="gap-2">
               <Download size={18} /> Export
            </Button>
-           <Button onClick={() => navigate(`/database/add?type=${activeTab}`)} className="gap-2 shadow-lg shadow-primary/25">
-              <Plus size={18} /> Add {activeTab.slice(0, -1)}
+           <Button onClick={handleAdd} className="gap-2 shadow-lg shadow-primary/25">
+              <Plus size={18} /> Add {activeTab.slice(0, -1) || 'Item'}
            </Button>
         </div>
       </div>
@@ -187,7 +240,7 @@ export const Database = () => {
         
         {/* Pagination */}
         <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/30 rounded-b-2xl">
-          <span className="text-sm text-gray-500 font-medium">Showing <span className="text-text">1-10</span> of <span className="text-text">{data.length}</span> results</span>
+          <span className="text-sm text-gray-500 font-medium">Showing <span className="text-text">{filteredData.length > 0 ? 1 : 0}-{filteredData.length > 10 ? 10 : filteredData.length}</span> of <span className="text-text">{filteredData.length}</span> results</span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled>Previous</Button>
             <Button variant="outline" size="sm" disabled>Next</Button>

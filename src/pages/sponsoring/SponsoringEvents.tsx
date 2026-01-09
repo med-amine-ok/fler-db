@@ -31,8 +31,8 @@ export const SponsoringEvents = () => {
             <div className="flex justify-between items-start mb-4">
                <span className={clsx(
                  "px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide",
-                 event.status === 'ongoing' ? 'bg-blue-50 text-blue-600' : 
-                 event.status === 'ongoing' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'
+                 (event.status as string) === 'upcoming' ? 'bg-blue-50 text-blue-600' : 
+                 (event.status as string) === 'ongoing' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'
                )}>
                  {event.status}
                </span>

@@ -133,7 +133,6 @@ export const Database = () => {
             <td className={cellClasses}>
               <Badge variant={
                 item.status === 'signed' ? 'success' : 
-                item.status === 'negotiating' ? 'warning' : 
                 item.status === 'rejected' ? 'error' : 'default'
               }>
                 {item.status || 'Pending'}

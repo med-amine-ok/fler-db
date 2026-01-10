@@ -30,16 +30,21 @@ const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; err
       return { success: false, error: 'unauthorized' }; 
     }
 
-    const { data: profile, error } = await supabase
+    // Add timeout for profile operations
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Profile check timeout')), 5000)
+    );
+
+    const profilePromise = supabase
       .from('profiles')
       .select('id')
       .eq('id', user.id)
       .single();
 
+    const { data: profile, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
+
     if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
        console.error('Error fetching profile:', error);
-       // If it's a real DB error, we might want to try again or stay logged in but show error
-       // For now, let's treat it as a failure to ensure security
        return { success: false, error: 'db_error' };
     }
 
@@ -75,6 +80,14 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Add overall timeout for session initialization
+    const initTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Session initialization timeout - proceeding without full profile check');
+        setLoading(false);
+      }
+    }, 8000);
+
     // Check active session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
@@ -87,6 +100,11 @@ function App() {
       }
       setSession(session);
       setLoading(false);
+      clearTimeout(initTimeout);
+    }).catch((err) => {
+      console.error('Session check error:', err);
+      setLoading(false);
+      clearTimeout(initTimeout);
     });
 
     // Listen for changes

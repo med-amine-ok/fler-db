@@ -6,47 +6,64 @@ import { supabase } from '../../lib/supabase';
 export const SponsoringForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     status: 'contacted',
     contact_method: 'email',
-    assigned_user_id: '',
     notes: '',
     contact: ''
   });
 
   useEffect(() => {
-    fetchProfiles();
+    getCurrentUser();
   }, []);
 
-  const fetchProfiles = async () => {
-    const { data } = await supabase.from('profiles').select('*');
-    if (data) setProfiles(data);
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) setCurrentUserId(user.id);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    // Add timeout warning
+    const timeoutId = setTimeout(() => {
+      console.warn('Request is taking longer than expected. This might be a permissions issue.');
+      alert('Request timeout - check browser console (F12) for details. This might be an RLS (Row Level Security) policy issue.');
+      setLoading(false);
+    }, 10000);
+    
     try {
         const payload = {
             name: formData.name,
             status: formData.status,
             contact_method: formData.contact_method,
-            assigned_user_id: formData.assigned_user_id || null,
+            assigned_user_id: currentUserId,
             notes: formData.notes,
             contact: formData.contact
         };
 
-        const { error } = await supabase
+        console.log('Inserting company:', payload);
+        const { data, error } = await supabase
             .from('companies')
-            .insert(payload as any);
+            .insert(payload as any)
+            .select();
         
-        if (error) throw error;
+        console.log('Insert response:', { data, error });
+        
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
+        
+        clearTimeout(timeoutId);
         navigate('/teams/sponsoring');
     } catch (error: any) {
+        clearTimeout(timeoutId);
         console.error('Error adding company:', error);
-        alert('Failed to add company: ' + error.message);
+        alert('Failed to add company: ' + (error.message || error));
     } finally {
         setLoading(false);
     }
@@ -86,7 +103,6 @@ export const SponsoringForm = () => {
                 >
                   <option value="contacted">Contacted</option>
                   <option value="pending">Pending</option>
-                  <option value="negotiating">Negotiating</option>
                   <option value="signed">Signed</option>
                   <option value="rejected">Rejected</option>
                 </select>
@@ -116,20 +132,6 @@ export const SponsoringForm = () => {
               value={formData.contact}
               onChange={e => setFormData({...formData, contact: e.target.value})}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
-            <select 
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary outline-none bg-white"
-              value={formData.assigned_user_id}
-              onChange={e => setFormData({...formData, assigned_user_id: e.target.value})}
-            >
-              <option value="">Unassigned</option>
-              {profiles.map(p => (
-                  <option key={p.id} value={p.id}>{p.full_name || p.email}</option>
-              ))}
-            </select>
           </div>
 
           <div>

@@ -56,14 +56,9 @@ export const DatabaseForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                <select className="w-full px-4 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
                 <option value="contacted">Contacted</option>
-                <option value="negotiating">Negotiating</option>
                 <option value="signed">Signed</option>
                 <option value="rejected">Rejected</option>
               </select>
-            </div>
-             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
-              <input type="text" className="w-full px-4 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-primary" value={formData.assignedTo} onChange={e => setFormData({...formData, assignedTo: e.target.value})} />
             </div>
           </>
         )

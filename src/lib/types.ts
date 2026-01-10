@@ -30,7 +30,7 @@ export type Team = {
 export type Company = {
     id: string | number;
     name: string;
-    status: 'contacted' | 'pending' | 'signed' | 'rejected' | 'negotiating';
+    status: 'contacted' | 'pending' | 'signed' | 'rejected' ;
     eventId?: string; // Optional for mock data compatibility
     assignedTo?: string; // profiles.full_name
     contactMethod?: 'call' | 'email' | 'linkedin' | 'outing';

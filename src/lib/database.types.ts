@@ -17,6 +17,7 @@ export interface Database {
                     phone_number: string | null
                     team: 'logistics' | 'sponsoring' | null
                     created_at: string
+                    ranking: number | null
                 }
                 Insert: {
                     id: string
@@ -25,6 +26,7 @@ export interface Database {
                     phone_number?: string | null
                     team?: 'logistics' | 'sponsoring' | null
                     created_at?: string
+                    ranking?: number | null
                 }
                 Update: {
                     id?: string
@@ -33,6 +35,7 @@ export interface Database {
                     phone_number?: string | null
                     team?: 'logistics' | 'sponsoring' | null
                     created_at?: string
+                    ranking?: number | null
                 }
             }
             events: {
@@ -146,6 +149,21 @@ export interface Database {
                     source_id?: number
                     contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
                     created_at?: string
+                }
+            }
+            user_rankings: {
+                Row: {
+                    id: string
+                    full_name: string | null
+                    email: string | null
+                    team: 'logistics' | 'sponsoring' | null
+                    total_points: number
+                    total_activities: number
+                    call_count: number
+                    email_count: number
+                    linkedin_count: number
+                    outing_count: number
+                    rank: number
                 }
             }
         }

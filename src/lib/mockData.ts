@@ -32,6 +32,5 @@ export const mockUser: User = {
 
 export const mockCompanies: Company[] = [
     { id: 'c1', name: 'TechCorp', status: 'contacted', eventId: '1', assignedTo: 'u1' },
-    { id: 'c2', name: 'BuildSoft', status: 'negotiating', eventId: '1' },
     { id: 'c3', name: 'InnovateInc', status: 'signed', eventId: '2' },
 ];

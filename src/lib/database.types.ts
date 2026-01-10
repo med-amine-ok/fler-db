@@ -67,6 +67,7 @@ export interface Database {
                     assigned_user_id: string | null
                     notes: string | null
                     contact: string | null
+                    event_id: number | null
                     created_at: string
                 }
                 Insert: {
@@ -77,6 +78,7 @@ export interface Database {
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
+                    event_id?: number | null
                     created_at?: string
                 }
                 Update: {
@@ -87,6 +89,7 @@ export interface Database {
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
+                    event_id?: number | null
                     created_at?: string
                 }
             }

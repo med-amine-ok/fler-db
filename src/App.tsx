@@ -24,47 +24,65 @@ const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; err
   try {
     const userEmail = user.email?.toLowerCase().trim();
     
+    console.log('Profile check for user:', userEmail);
+    
     // SECURITY: Strictly enforce email whitelist at the core level
     if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
       console.error('Security Alert: Unauthorized email attempted access:', user.email);
       return { success: false, error: 'unauthorized' }; 
     }
 
-    // Add timeout for profile operations
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Profile check timeout')), 5000)
-    );
+    console.log('Email authorized, checking profile...');
 
-    const profilePromise = supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
+    // Quick check with short timeout
+    try {
+      const { data: profile, error } = await Promise.race([
+        supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .single(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+      ]) as any;
 
-    const { data: profile, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
-       console.error('Error fetching profile:', error);
-       return { success: false, error: 'db_error' };
-    }
-
-    if (!profile) {
-      console.log('Creating new profile for user...', user.id);
-      const { error: insertError } = await supabase.from('profiles').insert({
-        id: user.id,
-        email: userEmail,
-        full_name: user.user_metadata?.full_name || userEmail.split('@')[0],
-      } as any);
-      
-      if (insertError) {
-          console.error('Error creating profile:', insertError);
-          return { success: false, error: 'db_error' };
+      // If profile doesn't exist, create it in the background (don't wait)
+      if (!profile || (error && error.code === 'PGRST116')) {
+        console.log('Creating new profile for user in background...', user.id);
+        // Fire and forget - don't await this
+        supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: userEmail,
+            full_name: user.user_metadata?.full_name || userEmail.split('@')[0],
+          } as any)
+          .then(() => {
+            console.log('Background profile created successfully');
+          })
+         
       }
+    } catch (timeoutErr) {
+      console.log('Profile check timed out - creating in background...');
+      // Timeout or error - create profile in background
+      supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: userEmail,
+          full_name: user.user_metadata?.full_name || userEmail.split('@')[0],
+        } as any)
+        .then(() => {
+          console.log('Background profile created successfully');
+        })
+        
     }
+    
+    console.log('Profile check completed - proceeding with login');
     return { success: true }; 
   } catch (err) {
-      console.error('Unexpected error creating profile:', err);
-      return { success: false, error: 'unexpected' };
+      console.error('Profile check error:', err);
+      // Allow login even if profile check fails - it will be created in background
+      return { success: true };
   }
 };
 
@@ -80,57 +98,84 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Add overall timeout for session initialization
     const initTimeout = setTimeout(() => {
-      if (loading) {
+      if (isMounted && loading) {
         console.warn('Session initialization timeout - proceeding without full profile check');
         setLoading(false);
       }
-    }, 8000);
+    }, 5000);
 
     // Check active session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      
+      console.log('Initial session check:', session ? 'Session found' : 'No session');
+      
       if (session?.user) {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
+          console.log('Profile check failed, signing out');
           await supabase.auth.signOut();
-          window.location.href = `/?error=${result.error || 'unauthorized'}`;
+          if (isMounted) {
+            window.location.href = `/?error=${result.error || 'unauthorized'}`;
+          }
           return;
         }
       }
-      setSession(session);
-      setLoading(false);
-      clearTimeout(initTimeout);
+      if (isMounted) {
+        setSession(session);
+        setLoading(false);
+        clearTimeout(initTimeout);
+      }
     }).catch((err) => {
       console.error('Session check error:', err);
-      setLoading(false);
-      clearTimeout(initTimeout);
+      if (isMounted) {
+        setLoading(false);
+        clearTimeout(initTimeout);
+      }
     });
 
     // Listen for changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+      
+      console.log('Auth state change event:', event);
+      console.log('New session:', session ? 'Session exists' : 'No session');
+      
       if (session?.user) {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
+          console.log('Profile check failed on auth change, signing out');
           await supabase.auth.signOut();
-          window.location.href = `/?error=${result.error || 'unauthorized'}`;
+          if (isMounted) {
+            window.location.href = `/?error=${result.error || 'unauthorized'}`;
+          }
           return;
         }
       }
-      setSession(session);
-      setLoading(false);
+      if (isMounted) {
+        setSession(session);
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(initTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={session ? <Navigate to="/home" /> : <Auth />} />
+        <Route path="/" element={session ? <Navigate to="/home" replace /> : <Auth />} />
         
         {/* Protected Dashboard Routes */}
         <Route element={

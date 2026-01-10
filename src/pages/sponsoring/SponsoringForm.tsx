@@ -7,8 +7,10 @@ export const SponsoringForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [events, setEvents] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
+    event_id: '',
     status: 'contacted',
     contact_method: 'email',
     notes: '',
@@ -17,11 +19,26 @@ export const SponsoringForm = () => {
 
   useEffect(() => {
     getCurrentUser();
+    fetchEvents();
   }, []);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) setCurrentUserId(user.id);
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, name, status')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (e) {
+      console.error('Error fetching events:', e);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +55,7 @@ export const SponsoringForm = () => {
     try {
         const payload = {
             name: formData.name,
+            event_id: formData.event_id ? parseInt(formData.event_id) : null,
             status: formData.status,
             contact_method: formData.contact_method,
             assigned_user_id: currentUserId,
@@ -94,6 +112,23 @@ export const SponsoringForm = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event</label>
+                <select 
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary outline-none bg-white"
+                  value={formData.event_id}
+                  onChange={e => setFormData({...formData, event_id: e.target.value})}
+                >
+                  <option value="">Select an event...</option>
+                  {events.map((event) => (
+                    <option key={event.id} value={event.id}>
+                      {event.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Which event is this contact for?</p>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select 

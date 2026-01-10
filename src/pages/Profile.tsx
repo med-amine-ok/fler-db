@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Shield, User, Award, Phone, Calendar as CalendarIcon, Edit2, Save, X } from 'lucide-react';
+import { Mail, Shield, User, Award, Calendar as CalendarIcon, Edit2, Save, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -319,7 +319,7 @@ export const Profile = () => {
                       </p>
                     </div>
                     <Badge variant="success" className="bg-green-100 text-green-700 border-green-200 whitespace-nowrap">
-                      +{POINTS[activity.contact_method as keyof typeof POINTS] || 0} pts
+                      + pts
                     </Badge>
                   </div>
                 ))}

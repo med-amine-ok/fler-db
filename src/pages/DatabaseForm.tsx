@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export const DatabaseForm = () => {
   const navigate = useNavigate();
@@ -12,8 +13,32 @@ export const DatabaseForm = () => {
     status: '',
     date: '',
     description: '',
-    assignedTo: ''
+    assignedTo: '',
+    eventId: ''
   });
+
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (type === 'Companies') {
+      fetchEvents();
+    }
+  }, [type]);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, name, status')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (e) {
+      console.error('Error fetching events:', e);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +78,27 @@ export const DatabaseForm = () => {
               <input type="text" required className="w-full px-4 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-primary" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Event</label>
+              <select 
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white" 
+                value={formData.eventId} 
+                onChange={e => setFormData({...formData, eventId: e.target.value})}
+              >
+                <option value="">Select an event...</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-400 mt-1">Which event is this contact for?</p>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                <select className="w-full px-4 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                <option value="">Select status...</option>
                 <option value="contacted">Contacted</option>
+                <option value="pending">Pending</option>
                 <option value="signed">Signed</option>
                 <option value="rejected">Rejected</option>
               </select>
@@ -78,7 +121,7 @@ export const DatabaseForm = () => {
         <h1 className="text-2xl font-bold mb-6">Add New {type ? type.slice(0, -1) : 'Item'}</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {renderFields()}
-          <button type="submit" className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+          <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
             <Save size={18} /> Save Record
           </button>
         </form>

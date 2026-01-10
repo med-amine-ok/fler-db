@@ -30,7 +30,7 @@ export const Database = () => {
         switch(activeTab) {
             
             case 'Companies':
-                query = supabase.from('companies').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                query = supabase.from('companies').select('*, profiles(full_name), events(name)').order('created_at', { ascending: false });
                 break;
             case 'Hotels':
                 query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'hotel').order('created_at', { ascending: false });
@@ -76,11 +76,11 @@ export const Database = () => {
       return (
         <tr className="bg-gray-50/50 border-b border-gray-100">
           <th className={commonClasses}>Company Name</th>
+          <th className={commonClasses}>Event</th>
           <th className={commonClasses}>Status</th>
           <th className={commonClasses}>Contact Method</th>
           <th className={commonClasses}>Contact</th>
           <th className={commonClasses}>Assigned To</th>
-          <th className="text-right py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Actions</th>
         </tr>
       );
     }
@@ -93,7 +93,6 @@ export const Database = () => {
         <th className={commonClasses}>Type</th>
         <th className={commonClasses}>Contact</th>
         <th className={commonClasses}>Assigned To</th>
-        <th className="text-right py-4 px-6 font-semibold text-gray-500 text-xs uppercase tracking-wider">Actions</th>
       </tr>
     );
   };
@@ -130,6 +129,7 @@ export const Database = () => {
       return (filteredData as any[]).map((item) => (
          <tr key={item.id} className={rowClasses}>
             <td className={clsx(cellClasses, "font-medium text-text")}>{item.name}</td>
+            <td className={cellClasses}>{item.events?.name || <span className="text-gray-300 italic">-</span>}</td>
             <td className={cellClasses}>
               <Badge variant={
                 item.status === 'signed' ? 'success' : 
@@ -141,11 +141,7 @@ export const Database = () => {
             <td className={clsx(cellClasses, "capitalize")}>{item.contact_method || '-'}</td>
              <td className={cellClasses}>{item.contact || '-'}</td>
             <td className={cellClasses}>{item.profiles?.full_name || <span className="text-gray-300 italic">Unassigned</span>}</td>
-            <td className="py-4 px-6 text-right">
-              <button className="p-1.5 hover:bg-gray-200 rounded-md text-gray-400 hover:text-text transition-all">
-                 <MoreHorizontal size={16} />
-              </button>
-            </td>
+            
          </tr>
       ));
     }

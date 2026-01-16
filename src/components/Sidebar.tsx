@@ -8,10 +8,10 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', path: '/home' },
-    { icon: User, label: 'My Profile', path: '/profile' },
+    { icon: Database, label: 'Database', path: '/database' },
     { icon: Calendar, label: 'Events', path: '/events' },
     { icon: Users, label: 'Teams', path: '/teams' },
-    { icon: Database, label: 'Database', path: '/database' },
+    { icon: User, label: 'My Profile', path: '/profile' },
   ];
 
   return (

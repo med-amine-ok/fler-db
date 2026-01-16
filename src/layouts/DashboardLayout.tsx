@@ -4,6 +4,8 @@ import { Bell, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+import { BottomNav } from '../components/BottomNav';
+
 export const DashboardLayout = () => {
   const location = useLocation();
   const pageTitle = location.pathname.split('/')[1] || 'Overview';
@@ -40,11 +42,11 @@ export const DashboardLayout = () => {
   return (
     <div className="flex min-h-screen bg-background font-sans">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main className="flex-1 md:ml-72">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-screen">
         {/* Top Header */}
-        <header className="sticky relative top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
            <div className="flex items-center gap-4">
-             {/* Mobile Menu Toggle */}
+             {/* Mobile Menu Toggle - Opens Drawer */}
              <button 
                onClick={() => setSidebarOpen(!sidebarOpen)}
                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -82,21 +84,15 @@ export const DashboardLayout = () => {
                 <LogOut size={18} />
                 <span className="font-medium hidden sm:inline">Logout</span>
               </button>
-
-              <button 
-                onClick={handleLogout}
-                className="sm:hidden p-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-red-500 transition-all"
-                title="Logout"
-              >
-                <LogOut size={18} />
-              </button>
            </div>
         </header>
 
-        <div className="p-4 md:p-8 animate-fade-in pb-20">
+        <div className="flex-1 p-4 md:p-8 animate-fade-in pb-24 md:pb-8">
           <Outlet />
         </div>
       </main>
+      
+      <BottomNav />
     </div>
   );
 };

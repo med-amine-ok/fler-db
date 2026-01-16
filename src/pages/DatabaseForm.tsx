@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export const DatabaseForm = () => {
@@ -28,6 +28,7 @@ export const DatabaseForm = () => {
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('events')
         .select('id, name, status')
@@ -37,6 +38,8 @@ export const DatabaseForm = () => {
       setEvents(data || []);
     } catch (e) {
       console.error('Error fetching events:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,7 +112,7 @@ export const DatabaseForm = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-24 md:pb-0">
       <button 
         onClick={() => navigate('/database')}
         className="flex items-center gap-2 text-gray-500 hover:text-text transition-colors"
@@ -117,13 +120,16 @@ export const DatabaseForm = () => {
         <ArrowLeft size={18} /> Back to Database
       </button>
 
-      <div className="glass-card p-8">
-        <h1 className="text-2xl font-bold mb-6">Add New {type ? type.slice(0, -1) : 'Item'}</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white md:glass-card rounded-xl shadow-sm border border-gray-100 p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Add New {type ? type.slice(0, -1) : 'Item'}</h1>
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
           {renderFields()}
-          <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-            <Save size={18} /> Save Record
-          </button>
+          
+          <div className="fixed bottom-16 left-0 right-0 p-4 bg-white border-t border-gray-100 md:static md:bg-transparent md:border-0 md:p-0 z-10 md:z-auto pb-safe md:pb-0">
+             <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg md:shadow-none">
+                <Save size={18} /> Save Record
+             </button>
+          </div>
         </form>
       </div>
     </div>

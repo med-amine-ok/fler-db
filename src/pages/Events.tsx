@@ -108,7 +108,7 @@ export const Events = () => {
                 className="w-full mt-auto group/btn text-xs md:text-sm h-9 rounded-lg"
               >
                 <FileText size={14} className="mr-2" />
-                Dossier
+                DS
                 <ArrowRight size={14} className="ml-auto opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all text-gray-400" />
               </Button>
             </div>

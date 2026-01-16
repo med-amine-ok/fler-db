@@ -30,7 +30,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
       
       {/* Sidebar */}
       <aside className={clsx(
-        "h-screen w-72 bg-sidebar text-white flex flex-col fixed left-0 top-0 shadow-2xl z-50 transition-transform duration-300 md:translate-x-0",
+        "h-screen w-full md:w-72 bg-sidebar text-white flex flex-col fixed left-0 top-0 shadow-2xl z-50 transition-transform duration-300 md:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 md:p-8 pb-4 flex items-center justify-between">

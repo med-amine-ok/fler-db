@@ -10,12 +10,14 @@ import type { Event } from '../lib/types';
 
 export const Home = () => {
   const navigate = useNavigate();
+  /* State */
   const [stats, setStats] = useState({
     contactCount: 0,
     eventCount: 0,
-    completionRate: 85 // Mocked for now or calculate based on status
+    completionRate: 0
   });
   const [recentEvents, setRecentEvents] = useState<Event[]>([]);
+  const [teams, setTeams] = useState(mockTeams);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,21 +26,38 @@ export const Home = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch Stats
+      // 1. Fetch Stats & Completion Rate
       const { count: contactCount } = await supabase.from('companies').select('*', { count: 'exact', head: true });
+      const { count: signedCount } = await supabase.from('companies').select('*', { count: 'exact', head: true }).eq('status', 'signed');
       const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
       
-      // Fetch Recent Events
+      const completionRate = contactCount ? Math.round(((signedCount || 0) / contactCount) * 100) : 0;
+
+      // 2. Fetch Recent Events
       const { data: eventsData } = await supabase
         .from('events')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(3);
 
+      // 3. Fetch Team Member Counts (from profiles)
+      // Assuming 'team' column in profiles stores either the Team ID or Team Name
+      const { data: profiles } = await supabase.from('profiles').select('team');
+      
+      const counts: Record<string, number> = {};
+      if (profiles) {
+         profiles.forEach((p: any) => {
+             if (p.team) {
+                 counts[p.team] = (counts[p.team] || 0) + 1;
+             }
+         });
+      }
+
+      // Update states
       setStats({
         contactCount: contactCount || 0,
         eventCount: eventCount || 0,
-        completionRate: 85
+        completionRate
       });
 
       if (eventsData) {
@@ -52,6 +71,16 @@ export const Home = () => {
          })));
       }
 
+      // Update Teams with real member counts
+      setTeams(prevTeams => prevTeams.map(t => {
+          // Check for count by ID ('1', '2') or Name ('Logistics', etc)
+          const realCount = counts[t.id] || counts[t.name] || counts[t.name.toLowerCase()] || 0;
+          return {
+              ...t,
+              memberCount: profiles ? realCount : t.memberCount
+          };
+      }));
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -60,7 +89,7 @@ export const Home = () => {
   };
 
   const handleTeamClick = (teamId: string) => {
-    const team = mockTeams.find(t => t.id === teamId);
+    const team = teams.find(t => t.id === teamId);
     if (!team) return;
 
     if (team.name.toLowerCase() === 'logistics') {
@@ -148,7 +177,7 @@ export const Home = () => {
           </div>
           
           <div className="space-y-3 md:space-y-4">
-            {mockTeams.map((team) => (
+            {teams.map((team) => (
               <Card 
                 key={team.id}
                 hover
@@ -201,7 +230,7 @@ export const Home = () => {
                        </Badge>
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                       <p className="text-xs md:text-sm text-gray-400 truncate">{new Date(event.date).toLocaleDateString()}</p>
+                       <p className="text-xs md:text-sm text-gray-400 truncate">Mab9ach Mab9ach</p>
                        <Button 
                         size="sm" 
                         variant="ghost" 
@@ -211,7 +240,7 @@ export const Home = () => {
                           navigate(`/events/${event.id}/dossier`);
                         }}
                        >
-                         Dossier
+                         DS
                        </Button>
                     </div>
                  </div>

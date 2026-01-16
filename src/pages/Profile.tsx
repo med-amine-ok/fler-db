@@ -130,22 +130,22 @@ export const Profile = () => {
   const currentScore = calculateScore();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+    <div className="w-full space-y-6 md:space-y-8 animate-fade-in">
       {/* Hero Header Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-blue-500 to-secondary p-8 md:p-12 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-primary via-blue-500 to-secondary p-6 md:p-12 text-white shadow-lg md:shadow-xl">
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
         
-        <div className="relative flex flex-col md:flex-row items-center gap-8 md:gap-12">
+        <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-12">
           <div className="flex-shrink-0">
-            <div className="w-32 h-32 rounded-2xl bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-white text-5xl font-bold shadow-2xl">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-2xl">
               {profile.full_name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase()}
             </div>
           </div>
           
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
-              <h1 className="text-4xl md:text-5xl font-bold">{profile.full_name || 'User Profile'}</h1>
+          <div className="flex-1 text-center md:text-left w-full">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-3 md:mb-2">
+              <h1 className="text-2xl md:text-5xl font-bold line-clamp-2">{profile.full_name || 'User Profile'}</h1>
               {!isEditing && (
                 <button 
                   onClick={() => setIsEditing(true)}
@@ -156,12 +156,12 @@ export const Profile = () => {
               )}
             </div>
             
-            <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-3 mt-4">
-              <span className="flex items-center gap-2 text-white/90 text-sm font-medium">
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-3 mt-3 md:mt-4">
+              <span className="flex items-center gap-2 text-white/90 text-xs md:text-sm font-medium break-all">
                 <Mail size={16} /> {profile.email}
               </span>
               {profile.team && (
-                <span className="hidden md:flex items-center gap-2 text-white/90 text-sm font-medium px-3 py-1 bg-white/20 rounded-full">
+                <span className="flex items-center gap-2 text-white/90 text-xs md:text-sm font-medium px-3 py-1 bg-white/20 rounded-full">
                   <Shield size={16} /> {profile.team.charAt(0).toUpperCase() + profile.team.slice(1)} Team
                 </span>
               )}
@@ -170,164 +170,163 @@ export const Profile = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Left Column: Profile Info */}
-        <div className="lg:col-span-1 space-y-7">
+        <div className="lg:col-span-1 space-y-6 md:space-y-7">
           {/* Personal Information Card */}
-          <Card className="p-6 border-0 shadow-md hover:shadow-lg transition-shadow w-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-text flex items-center gap-2">
-                <User size={20} className="text-primary" />
-                Profile Info
+          <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-white">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h3 className="text-base md:text-lg font-bold text-text flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
+                  <User size={20} className="text-primary" />
+                </div>
+                <span className="hidden sm:inline">Profile Info</span>
               </h3>
               {isEditing && (
                 <button 
                   onClick={() => setIsEditing(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-200 rounded-xl transition-all duration-200"
                 >
-                  <X size={18} className="text-gray-400" />
+                  <X size={18} className="text-gray-600" />
                 </button>
               )}
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-5 md:space-y-6">
               {isEditing ? (
                 <>
                   <div>
-                    <label className="text-xs font-semibold text-gray-600 block mb-2">Full Name</label>
+                    <label className="text-xs font-bold text-gray-700 block mb-2 md:mb-3 uppercase tracking-wider">Full Name</label>
                     <Input 
                       value={editForm.full_name} 
                       onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
                       placeholder="Enter full name"
+                      className="rounded-xl border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-600 block mb-2">Phone Number</label>
+                    <label className="text-xs font-bold text-gray-700 block mb-2 md:mb-3 uppercase tracking-wider">Phone Number</label>
                     <Input 
                       value={editForm.phone_number} 
                       onChange={(e) => setEditForm(prev => ({ ...prev, phone_number: e.target.value }))}
                       placeholder="+1 (555) 000-0000"
+                      className="rounded-xl border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   <Button 
                     onClick={handleUpdateProfile}
-                    className="w-full mt-4 gap-2"
+                    className="w-full mt-4 md:mt-6 gap-2 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg rounded-xl"
                   >
                     <Save size={16} /> Save Changes
                   </Button>
                 </>
               ) : (
                 <>
-                  <div className="pb-4 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Full Name</p>
-                    <p className="text-base font-semibold text-text">{profile.full_name || '—'}</p>
+                  <div className="pb-5 md:pb-6 border-b border-gray-100">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</p>
+                    <p className="text-base md:text-lg font-semibold text-text">{profile.full_name || '—'}</p>
                   </div>
-                  {/* <div className="pb-4 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</p>
-                    <p className="text-base font-semibold text-text break-all">{profile.email}</p>
-                  </div> */}
-                  <div className="pb-4 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone</p>
-                    <p className="text-base font-semibold text-text">{profile.phone_number || '—'}</p>
+                  <div className="pb-5 md:pb-6 border-b border-gray-100">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Phone</p>
+                    <p className="text-base md:text-lg font-semibold text-text break-all">{profile.phone_number || '—'}</p>
                   </div>
-                  <div className="pb-4 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Team</p>
-                    <Badge variant={profile.team === 'logistics' ? 'default' : 'success'} className="capitalize">
+                  <div className="pb-5 md:pb-6 border-b border-gray-100">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Team</p>
+                    <Badge variant={profile.team === 'logistics' ? 'default' : 'success'} className="capitalize rounded-lg text-xs md:text-sm">
                       {profile.team || 'Unassigned'}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Joined</p>
-                    <p className="text-base font-semibold text-text">{new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"></p>
-                    
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Joined</p>
+                    <p className="text-base md:text-lg font-semibold text-text">{new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                   </div>
                 </>
               )}
             </div>
           </Card>
 
-          {/* Points System Card */}
-          {/* <Card className="p-6 border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-gray-50 to-white">
-            <h3 className="text-lg font-bold text-text mb-5 flex items-center gap-2">
-              <Award size={20} className="text-amber-500" />
-              Points System
-            </h3>
-            <div className="space-y-3">
-              {Object.entries(POINTS).map(([method, points]) => (
-                <div key={method} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
-                  <span className="text-sm font-semibold text-gray-700 capitalize">{method}</span>
-                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-sm">
-                    {points}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card> */}
+         
         </div>
 
-        {/* Right Column: Statistics & Activities */}
-        <div className="lg:col-span-1 space-y-6">
+        {/* Right Column: Statistics */}
+        <div className="lg:col-span-1 space-y-4 md:space-y-6">
           {/* Score Card */}
-          <Card className="p-8 border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-primary to-blue-600 text-white">
-            <div className="space-y-3">
+          <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-primary to-blue-600 text-white">
+            <div className="space-y-3 md:space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold opacity-90">Current Score</h3>
-                <Award size={24} className="opacity-80" />
+                <h3 className="text-sm md:text-base font-semibold opacity-90 uppercase tracking-wider">Current Score</h3>
+                <Award size={20} className="md:w-6 md:h-6 opacity-80" />
               </div>
-              <p className="text-5xl md:text-6xl font-bold">{currentScore}</p>
-              <p className="text-sm opacity-80">Based on your contact activities</p>
+              <p className="text-4xl md:text-5xl lg:text-6xl font-bold">{currentScore}</p>
+              <p className="text-xs md:text-sm opacity-80">Based on your contact activities</p>
             </div>
           </Card>
 
-          {/* Recent Activities Card */}
-          <Card className="p-6 border-0 shadow-md hover:shadow-lg transition-shadow">
-            <h3 className="text-lg font-bold text-text mb-6 flex items-center gap-2">
-              <CalendarIcon size={20} className="text-secondary" />
-              Recent Activities
-            </h3>
-            
-            {activities.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <Award size={40} className="mx-auto mb-3 opacity-30" />
-                <p className="font-medium">No activities recorded yet</p>
-                <p className="text-sm mt-1">Start making contacts to build your ranking</p>
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {activities.map((activity, index) => (
-                  <div key={activity.id} className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-primary/20 transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-text">
-                        <span className="capitalize">{activity.contact_method}</span>
-                        {' '}
-                        <span className="text-gray-500">via</span>
-                        {' '}
-                        <span className="capitalize text-primary font-bold">{activity.source}</span>
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(activity.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                        {' '}
-                        at
-                        {' '}
-                        {new Date(activity.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    <Badge variant="success" className="bg-green-100 text-green-700 border-green-200 whitespace-nowrap">
-                      + pts
-                    </Badge>
+          {/* Activity Count Card */}
+            <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-secondary via-emerald-500 to-teal-600 text-white">
+              <div className="space-y-3 md:space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs md:text-sm font-bold opacity-90 uppercase tracking-wider">Total Activities</h3>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <CalendarIcon size={18} className="md:w-6 md:h-6 opacity-90" />
                   </div>
-                ))}
+                </div>
+                <p className="text-4xl md:text-5xl lg:text-6xl font-bold">{activities.length}</p>
+                <p className="text-xs md:text-sm opacity-85">Contact records created</p>
               </div>
-            )}
-          </Card>
+            </Card>
         </div>
       </div>
+
+      {/* Recent Activities Card - Full Width */}
+      <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+        <h3 className="text-base md:text-lg font-bold text-text mb-6 md:mb-8 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center flex-shrink-0">
+            <CalendarIcon size={18} className="md:w-5 md:h-5 text-secondary" />
+          </div>
+          <span className="hidden sm:inline">Recent Activities</span>
+          <span className="sm:hidden">Activities</span>
+        </h3>
+        
+        {activities.length === 0 ? (
+          <div className="text-center py-12 md:py-16 text-gray-400">
+            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+              <Award size={32} className="md:w-10 md:h-10 opacity-40" />
+            </div>
+            <p className="font-semibold text-gray-600 text-sm md:text-base">No activities recorded yet</p>
+            <p className="text-xs md:text-sm mt-2 text-gray-500">Start making contacts to build your ranking</p>
+          </div>
+        ) : (
+          <div className="space-y-3 md:space-y-4 max-h-[400px] md:max-h-[500px] overflow-y-auto">
+            {activities.map((activity, index) => (
+              <div key={activity.id} className="flex items-start gap-3 md:gap-4 p-4 md:p-5 bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl md:rounded-2xl border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all duration-200 group">
+                <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary font-bold text-xs md:text-sm group-hover:shadow-md transition-all duration-200">
+                  {index + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm font-bold text-text line-clamp-1 md:line-clamp-none">
+                    <span className="capitalize text-primary">{activity.contact_method}</span>
+                    {' '}
+                    <span className="text-gray-400 hidden sm:inline">•</span>
+                    {' '}
+                    <span className="capitalize text-gray-600">{activity.source}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 md:mt-1.5 font-medium line-clamp-1 md:line-clamp-none">
+                    {new Date(activity.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {' '}
+                    <span className="text-gray-400 hidden sm:inline">•</span>
+                    {' '}
+                    {new Date(activity.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+                <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 whitespace-nowrap rounded-lg font-bold text-xs md:text-sm flex-shrink-0">
+                  + pts
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

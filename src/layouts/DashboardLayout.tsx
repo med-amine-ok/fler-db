@@ -9,6 +9,7 @@ export const DashboardLayout = () => {
   const pageTitle = location.pathname.split('/')[1] || 'Overview';
   const isHome = pageTitle.toLowerCase() === 'home' || pageTitle.toLowerCase() === 'overview';
   const [userName, setUserName] = useState('User');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -38,24 +39,35 @@ export const DashboardLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-background font-sans">
-      <Sidebar />
-      <main className="flex-1 ml-72">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <main className="flex-1 md:ml-72">
         {/* Top Header */}
-        <header className="sticky relative top-0 z-40 bg-background/80 backdrop-blur-md px-8 py-5 flex items-center justify-between border-b border-gray-200/50">
-           <h2 className="text-xl font-bold text-text capitalize tracking-tight">
-             {isHome ? (
-               <span className="bg-gradient-to-r from-text to-gray-500 bg-clip-text text-transparent">
-                 Welcome back, {userName.split(' ')[0]} 
-               </span>
-             ) : (
-               <>
-                 {pageTitle.replace('-', ' ')}
-                 {location.pathname.includes('database') && ' Database'}
-               </>
-             )}
-           </h2>
-
+        <header className="sticky relative top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
            <div className="flex items-center gap-4">
+             {/* Mobile Menu Toggle */}
+             <button 
+               onClick={() => setSidebarOpen(!sidebarOpen)}
+               className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+             >
+               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+               </svg>
+             </button>
+             <h2 className="text-lg md:text-xl font-bold text-text capitalize tracking-tight line-clamp-2">
+               {isHome ? (
+                 <span className="bg-gradient-to-r from-text to-gray-500 bg-clip-text text-transparent">
+                   Welcome back, {userName.split(' ')[0]} 
+                 </span>
+               ) : (
+                 <>
+                   {pageTitle.replace('-', ' ')}
+                   {location.pathname.includes('database') && ' Database'}
+                 </>
+               )}
+             </h2>
+           </div>
+
+           <div className="flex items-center gap-2 md:gap-4">
               
               <button className="relative p-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-primary transition-all">
                  <Bell size={20} />
@@ -64,16 +76,24 @@ export const DashboardLayout = () => {
 
               <button 
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-red-500 transition-all"
+                className="hidden sm:flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-red-500 transition-all text-sm md:text-base"
                 title="Logout"
               >
                 <LogOut size={18} />
-                <span className="text-sm font-medium">Logout</span>
+                <span className="font-medium hidden sm:inline">Logout</span>
+              </button>
+
+              <button 
+                onClick={handleLogout}
+                className="sm:hidden p-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-red-500 transition-all"
+                title="Logout"
+              >
+                <LogOut size={18} />
               </button>
            </div>
         </header>
 
-        <div className="p-8 animate-fade-in pb-20">
+        <div className="p-4 md:p-8 animate-fade-in pb-20">
           <Outlet />
         </div>
       </main>

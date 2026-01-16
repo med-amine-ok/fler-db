@@ -62,55 +62,55 @@ export const Events = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-end">
-        <div>
-           <h1 className="text-3xl font-bold text-text tracking-tight">Events</h1>
-           <p className="text-gray-500 mt-2 text-lg">Manage, track, and optimize your event portfolio.</p>
+    <div className="space-y-6 md:space-y-8 w-full px-4 md:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 md:gap-6">
+        <div className="space-y-1 md:space-y-2 w-full sm:flex-1">
+           <h1 className="text-2xl md:text-4xl font-bold text-text tracking-tight">Events</h1>
+           <p className="text-xs md:text-base text-gray-500">Manage, track, and optimize your event portfolio.</p>
            {error && <p className="text-xs text-orange-500 mt-1">{error}</p>}
         </div>
-        <Button className="shadow-lg shadow-primary/25">
+        <Button className="shadow-lg shadow-primary/25 text-xs md:text-base whitespace-nowrap w-full sm:w-auto">
           + New Event
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {events.map((event) => (
-          <Card key={event.id} hover className="flex flex-col h-full overflow-hidden group hover:shadow-md transition-all">
+          <Card key={event.id} hover className="flex flex-col h-full overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all rounded-2xl">
             {/* Image/Logo Header Area - Smaller */}
-            <div className="h-32 bg-gray-50 border-b border-gray-100 p-6 flex items-center justify-center relative">
+            <div className="h-24 md:h-32 bg-gray-50 border-b border-gray-100 p-4 md:p-6 flex items-center justify-center relative">
                <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                  <Button size="sm" onClick={() => navigate(`/events/${event.id}/dossier`)}>View Details</Button>
+                  <Button size="sm" onClick={() => navigate(`/events/${event.id}/dossier`)} className="text-xs md:text-sm">View Details</Button>
                </div>
                
                {event.logo ? (
                   <img src={event.logo} className="w-full h-full object-contain drop-shadow-sm transform group-hover:scale-105 transition-transform duration-500" alt={event.name} />
                ) : (
-                  <CalendarIcon size={40} className="text-gray-300" />
+                  <CalendarIcon size={32} className="md:w-10 md:h-10 text-gray-300" />
                )}
             </div>
             
-            <div className="p-5 flex-1 flex flex-col">
-              <div className="flex justify-between items-center mb-2">
-                 <h3 className="text-xl font-bold text-text group-hover:text-primary transition-colors">{event.name}</h3>
+            <div className="p-4 md:p-5 flex-1 flex flex-col">
+              <div className="flex justify-between items-start gap-2 mb-3 md:mb-4">
+                 <h3 className="text-base md:text-lg font-bold text-text group-hover:text-primary transition-colors line-clamp-2">{event.name}</h3>
                  <Badge variant={
                    event.status === 'ongoing' ? 'default' : 
                    event.status === 'finished' ? 'success' : 'outline'
-                 } className="scale-90">
+                 } className="scale-75 md:scale-90 whitespace-nowrap">
                    {event.status}
                  </Badge>
               </div>
 
-              <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
+              <p className="text-gray-500 text-xs md:text-sm mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
 
               <Button 
                 variant="outline"
                 size="sm"
                 onClick={() => navigate(`/events/${event.id}/dossier`)}
-                className="w-full mt-auto group/btn text-xs h-9"
+                className="w-full mt-auto group/btn text-xs md:text-sm h-9 rounded-lg"
               >
                 <FileText size={14} className="mr-2" />
-                Dossier Sponsoring
+                Dossier
                 <ArrowRight size={14} className="ml-auto opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all text-gray-400" />
               </Button>
             </div>

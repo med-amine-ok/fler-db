@@ -77,95 +77,95 @@ export const Home = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 md:space-y-8 w-full px-4 md:px-0">
       {/* Stats Overview */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 relative overflow-hidden group">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <Card className="p-4 md:p-6 relative overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Users size={80} />
           </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Total Contacts</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.contactCount}</h3>
-              <div className="flex items-center gap-1 mt-2 text-emerald-500 text-sm font-medium">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider">Total Contacts</p>
+              <h3 className="text-2xl md:text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.contactCount}</h3>
+              <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs md:text-sm font-medium">
                 <TrendingUp size={14} /> <span>+12% this week</span>
               </div>
             </div>
-            <div className="p-3 bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-lg shadow-primary/30">
-              <Users size={24} />
+            <div className="p-2 md:p-3 bg-gradient-to-br from-primary to-blue-600 text-white rounded-lg md:rounded-xl shadow-lg shadow-primary/30 flex-shrink-0">
+              <Users size={20} className="md:w-6 md:h-6" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 relative overflow-hidden group">
+        <Card className="p-4 md:p-6 relative overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Calendar size={80} />
           </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Target Events</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.eventCount}</h3>
-              <div className="flex items-center gap-1 mt-2 text-emerald-500 text-sm font-medium">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider">Target Events</p>
+              <h3 className="text-2xl md:text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.eventCount}</h3>
+              <div className="flex items-center gap-1 mt-2 text-emerald-500 text-xs md:text-sm font-medium">
                 <TrendingUp size={14} /> <span>On track</span>
               </div>
             </div>
-            <div className="p-3 bg-gradient-to-br from-secondary to-teal-500 text-white rounded-xl shadow-lg shadow-secondary/30">
-              <Calendar size={24} />
+            <div className="p-2 md:p-3 bg-gradient-to-br from-secondary to-teal-500 text-white rounded-lg md:rounded-xl shadow-lg shadow-secondary/30 flex-shrink-0">
+              <Calendar size={20} className="md:w-6 md:h-6" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 relative overflow-hidden group">
+        <Card className="p-4 md:p-6 relative overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl md:col-span-2 lg:col-span-1">
            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <CheckCircle2 size={80} />
           </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-400">Completion Rate</p>
-              <h3 className="text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.completionRate}%</h3>
-               <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3 max-w-[100px]">
-                <div className="bg-text h-1.5 rounded-full" style={{ width: `${stats.completionRate}%` }}></div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider">Completion Rate</p>
+              <h3 className="text-2xl md:text-4xl font-extrabold mt-2 text-text tracking-tighter">{stats.completionRate}%</h3>
+               <div className="w-full bg-gray-100 rounded-full h-1.5 md:h-2 mt-3 max-w-[120px]">
+                <div className="bg-text h-1.5 md:h-2 rounded-full transition-all duration-500" style={{ width: `${stats.completionRate}%` }}></div>
                </div>
             </div>
-            <div className="p-3 bg-text text-white rounded-xl shadow-lg shadow-gray-900/20">
-              <CheckCircle2 size={24} />
+            <div className="p-2 md:p-3 bg-text text-white rounded-lg md:rounded-xl shadow-lg shadow-gray-900/20 flex-shrink-0">
+              <CheckCircle2 size={20} className="md:w-6 md:h-6" />
             </div>
           </div>
         </Card>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Teams Sections */}
         <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-text">
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <h2 className="text-base md:text-xl font-bold flex items-center gap-2 text-text">
                Your Teams
             </h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/teams')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/teams')} className="text-xs md:text-sm">
               View all
             </Button>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {mockTeams.map((team) => (
               <Card 
                 key={team.id}
                 hover
                 onClick={() => handleTeamClick(team.id)}
-                className="p-5 flex items-center justify-between group"
+                className="p-4 md:p-5 flex items-center justify-between group border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl cursor-pointer"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                     <Users size={22} />
+                <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors flex-shrink-0">
+                     <Users size={18} className="md:w-6 md:h-6" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-text">{team.name}</h3>
-                    <p className="text-sm text-gray-400">{team.memberCount} Members • {team.description}</p>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm md:text-lg text-text line-clamp-1">{team.name}</h3>
+                    <p className="text-xs md:text-sm text-gray-400 line-clamp-1">{team.memberCount} Members • {team.description}</p>
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 group-hover:text-primary group-hover:bg-primary/5 transition-all">
-                   <ArrowRight size={20} />
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-gray-300 group-hover:text-primary group-hover:bg-primary/5 transition-all flex-shrink-0">
+                   <ArrowRight size={18} className="md:w-5 md:h-5" />
                 </div>
               </Card>
             ))}
@@ -174,19 +174,19 @@ export const Home = () => {
 
         {/* Events Sections */}
         <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-text">
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <h2 className="text-base md:text-xl font-bold flex items-center gap-2 text-text">
                Ongoing Events
             </h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/events')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/events')} className="text-xs md:text-sm">
               View all
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
              {recentEvents.length > 0 ? recentEvents.map((event) => (
-              <Card key={event.id} className="p-4 flex items-center gap-4">
-                 <div className="h-14 w-14 rounded-xl shrink-0 bg-white border border-gray-100 overflow-hidden flex items-center justify-center p-1">
+              <Card key={event.id} className="p-4 md:p-5 flex items-center gap-3 md:gap-4 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                 <div className="h-12 w-12 md:h-14 md:w-14 rounded-lg md:rounded-xl shrink-0 bg-white border border-gray-100 overflow-hidden flex items-center justify-center p-1">
                    {event.logo ? (
                       <img src={event.logo} alt={event.name} className="w-full h-full object-contain" />
                    ) : (
@@ -194,18 +194,18 @@ export const Home = () => {
                    )}
                  </div>
                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                       <h4 className="font-bold text-text truncate">{event.name}</h4>
-                       <Badge variant={event.status === 'ongoing' ? 'default' : 'success'} className="scale-90">
+                    <div className="flex items-center justify-between gap-2 mb-1 md:mb-2">
+                       <h4 className="font-bold text-text truncate text-sm md:text-base">{event.name}</h4>
+                       <Badge variant={event.status === 'ongoing' ? 'default' : 'success'} className="scale-75 md:scale-90 whitespace-nowrap">
                          {event.status}
                        </Badge>
                     </div>
-                    <div className="flex items-center justify-between">
-                       <p className="text-sm text-gray-400 truncate">{new Date(event.date).toLocaleDateString()}</p>
+                    <div className="flex items-center justify-between gap-2">
+                       <p className="text-xs md:text-sm text-gray-400 truncate">{new Date(event.date).toLocaleDateString()}</p>
                        <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="h-8 px-3 text-xs"
+                        className="h-7 md:h-8 px-2 md:px-3 text-xs"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/events/${event.id}/dossier`);
@@ -217,8 +217,8 @@ export const Home = () => {
                  </div>
               </Card>
             )) : (
-                <div className="text-center py-10 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-                    No events found. Start by creating one!
+                <div className="text-center py-8 md:py-10 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                    <p className="text-xs md:text-sm">No events found. Start by creating one!</p>
                 </div>
             )}
           </div>

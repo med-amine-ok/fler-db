@@ -75,15 +75,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-white/5 rounded-2xl">
-           <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-4 py-2 w-full rounded-lg text-xs font-medium bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-          >
-            <LogOut size={14} />
-            Sign Out
-          </button>
-        </div>
+      
       </aside>
     </>
   );

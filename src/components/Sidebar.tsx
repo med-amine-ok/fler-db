@@ -1,14 +1,10 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Calendar, Database, User, LogOut, ChevronRight, X } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, Users, Calendar, Database, User, ChevronRight, X } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) => {
-  const navigate = useNavigate();
+  
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    navigate('/auth');
-  };
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', path: '/home' },

@@ -86,10 +86,7 @@ const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; err
   }
 };
 
-const ProtectedRoute = ({ children, session, loading }: { children: React.ReactNode, session: Session | null, loading: boolean }) => {
-  if (loading) {
-    return <div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
-  }
+const ProtectedRoute = ({ children, session }: { children: React.ReactNode, session: Session | null }) => {
   return session ? <>{children}</> : <Navigate to="/" />;
 };
 
@@ -195,7 +192,7 @@ function App() {
         
         {/* Protected Dashboard Routes */}
         <Route element={
-          <ProtectedRoute session={session} loading={loading}>
+          <ProtectedRoute session={session}>
             <DashboardLayout />
           </ProtectedRoute>
         }>

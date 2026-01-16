@@ -387,5 +387,5 @@ For issues, questions, or suggestions:
 ## 🎉 Acknowledgments
 
 Built with modern web technologies for efficient event management and team collaboration.
-
+wiiiiiii
 **Happy organizing! 🚀**

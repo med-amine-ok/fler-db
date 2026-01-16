@@ -66,21 +66,18 @@ export const Events = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 md:gap-6">
         <div className="space-y-1 md:space-y-2 w-full sm:flex-1">
            <h1 className="text-2xl md:text-4xl font-bold text-text tracking-tight">Events</h1>
-           <p className="text-xs md:text-base text-gray-500">Manage, track, and optimize your event portfolio.</p>
+           <p className="text-xs md:text-base text-gray-500">Chose the event you work for</p>
            {error && <p className="text-xs text-orange-500 mt-1">{error}</p>}
         </div>
-        <Button className="shadow-lg shadow-primary/25 text-xs md:text-base whitespace-nowrap w-full sm:w-auto">
-          + New Event
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
         {events.map((event) => (
-          <Card key={event.id} hover className="flex flex-col h-full overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all rounded-2xl">
+          <Card key={event.id} hover onClick={() => navigate(`/events/${event.id}/dossier`)} className="flex flex-col h-full overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all rounded-2xl">
             {/* Image/Logo Header Area - Smaller */}
             <div className="h-24 md:h-32 bg-gray-50 border-b border-gray-100 p-4 md:p-6 flex items-center justify-center relative">
                <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                  <Button size="sm" onClick={() => navigate(`/events/${event.id}/dossier`)} className="text-xs md:text-sm">View Details</Button>
+                  <Button size="sm" className="text-xs md:text-sm">View Details</Button>
                </div>
                
                {event.logo ? (
@@ -91,7 +88,9 @@ export const Events = () => {
             </div>
             
             <div className="p-4 md:p-5 flex-1 flex flex-col">
+              
               <div className="flex justify-between items-start gap-2 mb-3 md:mb-4">
+                
                  <h3 className="text-base md:text-lg font-bold text-text group-hover:text-primary transition-colors line-clamp-2">{event.name}</h3>
                  <Badge variant={
                    event.status === 'ongoing' ? 'default' : 
@@ -106,7 +105,6 @@ export const Events = () => {
               <Button 
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(`/events/${event.id}/dossier`)}
                 className="w-full mt-auto group/btn text-xs md:text-sm h-9 rounded-lg"
               >
                 <FileText size={14} className="mr-2" />

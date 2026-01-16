@@ -1,125 +1,212 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Check } from 'lucide-react';
+import { ArrowLeft, Copy, Download, Check, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { mockEvents } from '../lib/mockData';
+import { Button } from '../components/ui/Button';
+import type { Event } from '../lib/types';
 
 export const EventDossier = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    date: '',
-    description: '',
-    notes: ''
-  });
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (id) {
+        fetchEvent(id);
+    }
+  }, [id]);
+
+  const fetchEvent = async (eventId: string) => {
+    setLoading(true);
     
-    // Create text content for the file
-    const fileContent = `
-SPONSORING DOSSIER
-Event ID: ${id}
-Date: ${formData.date}
--------------------------
-DESCRIPTION:
-${formData.description}
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', eventId)
+        .single();
 
-----------------
-NOTES:
-${formData.notes}
-    `.trim();
+      if (error) throw error;
 
-    // Create blob and download link
-    const blob = new Blob([fileContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `dossier_event_${id}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    
-    // Clean up
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    // Simulate API call and proceed
-    setTimeout(() => setSubmitted(true), 500);
+      if (data) {
+        const dbEvent = data as any;
+        setEvent({
+          id: dbEvent.id,
+          name: dbEvent.name,
+          date: dbEvent.created_at,
+          status: dbEvent.status as any || 'planned',
+          description: 'No description available',
+          logo: undefined
+        });
+      } else {
+        // Fallback to mock if query succeeds but no data found (rare with single())
+        const mock = mockEvents.find(e => e.id === eventId);
+        if (mock) setEvent(mock);
+      }
+    } catch (err) {
+      console.error('Error fetching event for dossier:', err);
+      // Fallback to mock on error
+      const mock = mockEvents.find(e => e.id === eventId);
+      if (mock) setEvent(mock);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Templates configuration
+  const EVENT_TEMPLATES: Record<string, string> = {
+    'AEC': `Madame, Monsieur le président directeur général de ………………..
+
+Dans le cadre de l’organisation de l’Algerian Engineering Competition (AEC), un hackathon d’ingénierie réunissant les meilleurs talents pour résoudre des problématiques techniques réelles, nous sollicitons le soutien de ……………….. en tant que sponsor.
+
+Notre événement, organisé par le Vision & Innovation Club (VIC) de l’École Nationale Polytechnique d’Alger, vise à encourager l’innovation et à renforcer les liens entre les étudiants et le monde professionnel.
+
+En devenant partenaire, votre entreprise bénéficiera d’une visibilité stratégique auprès d’un public qualifié (étudiants, chercheurs, entrepreneurs) et d’une mise en avant sur nos supports de communication.
+
+Nous serions ravis de vous présenter les modalités de partenariat et restons à votre disposition pour toute information complémentaire.
+
+Dans l’attente de votre retour, veuillez agréer, Madame, Monsieur, l’expression de nos salutations distinguées.`,
+    
+     'GALA': `Madame,jjjjjjjjjjjj 
+
+Dans le cadre de l’organisation de l’Algerian Engineering Competition (AEC), un hackathon d’ingénierie réunissant les meilleurs talents pour résoudre des problématiques techniques réelles, nous sollicitons le soutien de ……………….. en tant que sponsor.
+
+Notre événement, organisé par le Vision & Innovation Club (VIC) de l’École Nationale Polytechnique d’Alger, vise à encourager l’innovation et à renforcer les liens entre les étudiants et le monde professionnel.
+
+En devenant partenaire, votre entreprise bénéficiera d’une visibilité stratégique auprès d’un public qualifié (étudiants, chercheurs, entrepreneurs) et d’une mise en avant sur nos supports de communication.
+
+Nous serions ravis de vous présenter les modalités de partenariat et restons à votre disposition pour toute information complémentaire.
+
+Dans l’attente de votre retour, veuillez agréer, Madame, Monsieur, l’expression de nos salutations distinguées.`,
+    
+  };
+
+  const getSponsorshipTemplate = (evt: Event) => {
+    // Check if there is a specific template for this event name
+    if (EVENT_TEMPLATES[evt.name]) {
+      return EVENT_TEMPLATES[evt.name];
+    }
+    
+    // Also check by ID if needed, though name is more readable
+    if (EVENT_TEMPLATES[evt.id]) {
+      return EVENT_TEMPLATES[evt.id as string];
+    }
+
+    // Generic fallback template
+    return `Madame, Monsieur,
+
+Dans le cadre de l’organisation de ${evt.name}, nous sollicitons votre soutien en tant que sponsor.
+
+Notre événement vise à encourager l’innovation et à renforcer les liens entre les étudiants et le monde professionnel.
+
+En devenant partenaire, votre entreprise bénéficiera d’une visibilité stratégique.
+
+Nous restons à votre disposition pour toute information complémentaire.
+
+Dans l’attente de votre retour, veuillez agréer, Madame, Monsieur, l’expression de nos salutations distinguées.`;
+  };
+
+  const handleCopyTemplate = () => {
+    if (!event) return;
+    const text = getSponsorshipTemplate(event);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadLogo = async () => {
+    if (!event?.logo) return;
+    
+    try {
+        const response = await fetch(event.logo);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${event.name.replace(/\s+/g, '_')}_logo.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        // Fallback for simple link download (cross-origin might fail to download and just open)
+        const link = document.createElement('a');
+        link.href = event.logo;
+        link.target = '_blank';
+        link.download = `${event.name}_logo`; // Hint
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl font-bold">Event not found</h2>
+        <Button onClick={() => navigate('/events')} className="mt-4">Back to Events</Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <button 
-        onClick={() => navigate(-1)}
+        onClick={() => navigate('/events')}
         className="flex items-center gap-2 text-gray-500 hover:text-text transition-colors"
       >
         <ArrowLeft size={18} /> Back to Events
       </button>
 
-      <div className="glass-card p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-text">Sponsoring Dossier</h1>
-          <p className="text-gray-500">Submit the sponsorship details for Event #{id}</p>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+        {/* Tools Section */}
+        <div className="space-y-6">
+            <div className="glass-card p-6 space-y-4">
+                <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">1</span>
+                        Sponsorship Request Letter
+                    </h3>
+                    <Button onClick={handleCopyTemplate} size="sm" title="Copy to clipboard" className="shadow-lg h-8 text-xs shrink-0">
+                        {copied ? <><Check size={14} className="mr-1"/> Copied</> : <><Copy size={14} className="mr-1"/> Copy Template</>}
+                    </Button>
+                </div>
+
+                <div className="relative group">
+                    <div className="bg-gray-50 border px-4 py-3 rounded-lg text-gray-600 text-sm font-medium h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed shadow-inner">
+                        {getSponsorshipTemplate(event)}
+                    </div>
+                </div>
+            </div>
+
+            <div className="glass-card p-6 space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm">2</span>
+                    Event Assets
+                </h3>
+                <p className="text-sm text-gray-500">Download the official event logo for your documents.</p>
+                
+                <Button 
+                    onClick={handleDownloadLogo} 
+                    className="w-full justify-center gap-2"
+                    disabled={!event.logo}
+                >
+                    <Download size={18} />
+                    {event.logo ? 'Download Logo' : 'No Logo Available'}
+                </Button>
+            </div>
         </div>
-
-        {!submitted ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Target Date</label>
-              <input 
-                type="date" 
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" 
-                required 
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description / Content</label>
-              <textarea 
-                rows={4}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                placeholder="Details about the sponsorship package..."
-                required
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Private Notes</label>
-              <textarea 
-                rows={2}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                placeholder="Internal notes..."
-                value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              />
-            </div>
-
-            <button 
-              type="submit"
-              className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-            >
-              <Save size={18} /> Save & Download
-            </button>
-          </form>
-        ) : (
-          <div className="text-center py-10 animate-fade-in">
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check size={32} />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Dossier Created!</h3>
-            <p className="text-gray-500 mb-8">You can now upload the official document.</p>
-          
-            <button 
-               onClick={() => navigate('/events')}
-               className="mt-8 text-primary font-medium hover:underline"
-            >
-              Back to Events List
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

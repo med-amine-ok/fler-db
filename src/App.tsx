@@ -96,6 +96,7 @@ const ProtectedRoute = ({ children, session, loading }: { children: React.ReactN
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -105,6 +106,7 @@ function App() {
       if (isMounted && loading) {
         console.warn('Session initialization timeout - proceeding without full profile check');
         setLoading(false);
+        setAuthInitialized(true);
       }
     }, 5000);
 
@@ -120,6 +122,9 @@ function App() {
           console.log('Profile check failed, signing out');
           await supabase.auth.signOut();
           if (isMounted) {
+            setSession(null);
+            setLoading(false);
+            setAuthInitialized(true);
             window.location.href = `/?error=${result.error || 'unauthorized'}`;
           }
           return;
@@ -128,12 +133,14 @@ function App() {
       if (isMounted) {
         setSession(session);
         setLoading(false);
+        setAuthInitialized(true);
         clearTimeout(initTimeout);
       }
     }).catch((err) => {
       console.error('Session check error:', err);
       if (isMounted) {
         setLoading(false);
+        setAuthInitialized(true);
         clearTimeout(initTimeout);
       }
     });
@@ -153,6 +160,9 @@ function App() {
           console.log('Profile check failed on auth change, signing out');
           await supabase.auth.signOut();
           if (isMounted) {
+            setSession(null);
+            setLoading(false);
+            setAuthInitialized(true);
             window.location.href = `/?error=${result.error || 'unauthorized'}`;
           }
           return;
@@ -161,6 +171,7 @@ function App() {
       if (isMounted) {
         setSession(session);
         setLoading(false);
+        setAuthInitialized(true);
       }
     });
 
@@ -170,6 +181,11 @@ function App() {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Only render routes after auth initialization is complete
+  if (!authInitialized) {
+    return <div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>;
+  }
 
   return (
     <BrowserRouter>

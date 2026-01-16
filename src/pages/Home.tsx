@@ -28,7 +28,7 @@ export const Home = () => {
     try {
       // 1. Fetch Stats & Completion Rate
       const { count: contactCount } = await supabase.from('companies').select('*', { count: 'exact', head: true });
-      const { count: signedCount } = await supabase.from('companies').select('*', { count: 'exact', head: true }).eq('status', 'signed');
+      const { count: signedCount } = await supabase.from('companies').select('*', { count: 'exact', head: true }).eq('status', 'contacted');
       const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
       
       const completionRate = contactCount ? Math.round(((signedCount || 0) / contactCount) * 100) : 0;

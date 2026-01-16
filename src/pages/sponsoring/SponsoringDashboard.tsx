@@ -121,7 +121,7 @@ export const SponsoringDashboard = () => {
                     <td className="py-3 md:py-4 px-3 md:px-6">
                       <span className={clsx(
                         "px-2 md:px-2.5 py-1 rounded-full text-xs font-semibold capitalize inline-block",
-                        item.status === 'signed' ? 'bg-green-100 text-green-700' :
+                        item.status === 'contacted' ? 'bg-green-100 text-green-700' :
                         item.status === 'rejected' ? 'bg-red-100 text-red-700' :
                         'bg-gray-100 text-gray-600'
                       )}>

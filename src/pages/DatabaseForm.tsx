@@ -102,7 +102,7 @@ export const DatabaseForm = () => {
                 <option value="">Select status...</option>
                 <option value="contacted">Contacted</option>
                 <option value="pending">Pending</option>
-                <option value="signed">Signed</option>
+                
                 <option value="rejected">Rejected</option>
               </select>
             </div>

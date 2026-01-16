@@ -153,7 +153,7 @@ export const Database = () => {
             <td className={clsx(cellClasses, "whitespace-nowrap")}>{item.events?.name || <span className="text-gray-300 italic">-</span>}</td>
             <td className={clsx(cellClasses, "whitespace-nowrap")}>
               <Badge variant={
-                item.status === 'signed' ? 'success' : 
+                item.status === 'contacted' ? 'success' : 
                 item.status === 'rejected' ? 'error' : 'default'
               } className="text-xs">
                 {item.status || 'Pending'}

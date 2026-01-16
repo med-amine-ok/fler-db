@@ -138,7 +138,6 @@ export const SponsoringForm = () => {
                 >
                   <option value="contacted">Contacted</option>
                   <option value="pending">Pending</option>
-                  <option value="signed">Signed</option>
                   <option value="rejected">Rejected</option>
                 </select>
               </div>

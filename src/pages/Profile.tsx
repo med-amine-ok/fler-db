@@ -10,12 +10,7 @@ import type { Database } from '../lib/database.types';
 type ProfileRecord = Database['public']['Tables']['profiles']['Row'];
 type ActivityRecord = Database['public']['Tables']['activities']['Row'];
 
-const POINTS = {
-  call: 6,
-  email: 3,
-  linkedin: 4,
-  outing: 10,
-};
+
 
 export const Profile = () => {
   const [loading, setLoading] = useState(true);

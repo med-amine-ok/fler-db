@@ -13,6 +13,12 @@ export const SponsoringEvents = () => {
     fetchEvents();
   }, []);
 
+  const EVENT_LOGOS: Record<string, string> = {
+    'AEC': '/AEC.png',
+    'Polymaze': '/polymaze.png',
+    'Charity': '/charity.png',
+  };
+
   const fetchEvents = async () => {
     try {
       const { data, error } = await supabase
@@ -21,7 +27,12 @@ export const SponsoringEvents = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEvents(data || []);
+      
+      const transformedEvents = (data || []).map((event: any) => ({
+        ...event,
+        logo: EVENT_LOGOS[event.name]
+      }));
+      setEvents(transformedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -67,7 +78,11 @@ export const SponsoringEvents = () => {
                <Calendar size={18} className="md:w-6 md:h-6 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
             </div>
 
-            <h3 className="text-lg md:text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">{event.name}</h3>
+
+            <div className="flex items-center justify-between gap-1">
+                <h3 className="text-lg md:text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">{event.name}</h3>
+                {event.logo && <img src={event.logo} alt={event.name} className="w-20 h-20 object-contain" />}
+            </div>
           </div>
         ))}
       </div>

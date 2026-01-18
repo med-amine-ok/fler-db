@@ -15,6 +15,7 @@ type ActivityRecord = Database['public']['Tables']['activities']['Row'];
 export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileRecord | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [activities, setActivities] = useState<ActivityRecord[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   
@@ -36,6 +37,8 @@ export const Profile = () => {
         setError('No authenticated user found.');
         return;
       }
+      
+      setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || null);
 
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -133,9 +136,17 @@ export const Profile = () => {
         
         <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-12">
           <div className="flex-shrink-0">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-2xl">
-              {profile.full_name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase()}
-            </div>
+            {avatarUrl ? (
+              <img 
+                src={avatarUrl} 
+                alt="Profile" 
+                className="w-24 h-24 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl object-cover bg-white/20 backdrop-blur"
+              />
+            ) : (
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-2xl">
+                {profile.full_name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase()}
+              </div>
+            )}
           </div>
           
           <div className="flex-1 text-center md:text-left w-full">

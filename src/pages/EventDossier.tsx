@@ -39,24 +39,30 @@ export const EventDossier = () => {
           date: dbEvent.created_at,
           status: dbEvent.status as any || 'planned',
           description: 'No description available',
-          logo: undefined
+          logo: EVENT_LOGOS[dbEvent.name]
         });
       } else {
         // Fallback to mock if query succeeds but no data found (rare with single())
         const mock = mockEvents.find(e => e.id === eventId);
-        if (mock) setEvent(mock);
+        if (mock) setEvent({ ...mock, logo: EVENT_LOGOS[mock.name] || mock.logo });
       }
     } catch (err) {
       console.error('Error fetching event for dossier:', err);
       // Fallback to mock on error
       const mock = mockEvents.find(e => e.id === eventId);
-      if (mock) setEvent(mock);
+      if (mock) setEvent({ ...mock, logo: EVENT_LOGOS[mock.name] || mock.logo });
     } finally {
       setLoading(false);
     }
   };
 
   // Templates configuration
+  const EVENT_LOGOS: Record<string, string> = {
+    'AEC': '/AEC.png',
+    'Polymaze': '/polymaze.png',
+    'Charity': '/charity.png',
+  };
+
   const EVENT_TEMPLATES: Record<string, string> = {
     'AEC': `Madame, Monsieur le président directeur général de ………………..
 

@@ -1,9 +1,52 @@
 import { useNavigate } from 'react-router-dom';
-import { Users, ChevronRight } from 'lucide-react';
+import { Users, ChevronRight, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 import { mockTeams } from '../lib/mockData';
+import type { Team } from '../lib/types';
 
 export const Teams = () => {
   const navigate = useNavigate();
+  const [teams, setTeams] = useState<Team[]>(mockTeams);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTeamStats();
+  }, []);
+
+  const fetchTeamStats = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('team');
+
+      if (error) throw error;
+
+      if (profiles) {
+        // Count members per team
+        const counts: Record<string, number> = {};
+        profiles.forEach((p: any) => {
+          if (p.team) {
+            counts[p.team] = (counts[p.team] || 0) + 1;
+          }
+        });
+
+        // Update teams with real counts
+        setTeams(prevTeams => prevTeams.map(t => {
+          // Check for count by ID ('1', '2') or Name ('Logistics', etc) or lowercase
+          const realCount = counts[t.id] || counts[t.name] || counts[t.name.toLowerCase()] || 0;
+          return {
+            ...t,
+            memberCount: realCount
+          };
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching team stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTeamClick = (teamId: string, teamName: string) => {
     if (teamName.toLowerCase() === 'logistics') {
@@ -15,6 +58,14 @@ export const Teams = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 px-4 md:px-0 w-full">
       <header className="space-y-2 md:space-y-3">
@@ -23,7 +74,7 @@ export const Teams = () => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {mockTeams.map((team) => (
+        {teams.map((team) => (
           <div 
             key={team.id}
             onClick={() => handleTeamClick(team.id, team.name)}

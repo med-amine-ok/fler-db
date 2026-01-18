@@ -14,6 +14,12 @@ export const Events = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const EVENT_LOGOS: Record<string, string> = {
+    'AEC': '/AEC.png',
+    'Polymaze': '/polymaze.png',
+    'Charity': '/charity.png',
+  };
+
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -36,17 +42,17 @@ export const Events = () => {
             date: dbEvent.created_at, // Use created_at as date for now
             status: dbEvent.status as any || 'planned',
             description: 'No description available.', // Default
-            logo: undefined // No logo in DB
+            logo: EVENT_LOGOS[dbEvent.name] // Resolve logo from local mapping
         }));
         setEvents(transformed);
       } else {
         // Fallback to mock data if DB is empty or connection fails/returns nothing for demo
-        setEvents(mockEvents); 
+        setEvents(mockEvents.map(e => ({ ...e, logo: EVENT_LOGOS[e.name] || e.logo }))); 
       }
     } catch (err: any) {
       console.error('Error fetching events:', err);
       // Fallback to mock data on error for seamless demo experience if key is invalid
-      setEvents(mockEvents); 
+      setEvents(mockEvents.map(e => ({ ...e, logo: EVENT_LOGOS[e.name] || e.logo }))); 
       setError('Failed to load real events. Showing cached data.');
     } finally {
       setLoading(false);
@@ -71,7 +77,7 @@ export const Events = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4  mx-auto md:gap-6">
         {events.map((event) => (
           <Card key={event.id} hover onClick={() => navigate(`/events/${event.id}/dossier`)} className="flex flex-col h-full overflow-hidden group border-0 shadow-lg hover:shadow-xl transition-all rounded-2xl">
             {/* Image/Logo Header Area - Smaller */}

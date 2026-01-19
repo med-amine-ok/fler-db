@@ -42,7 +42,12 @@ export const DashboardLayout = () => {
   return (
     <div className="flex min-h-screen bg-background font-sans">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main className="flex-1 md:ml-72 flex flex-col min-h-screen">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-screen relative">
+        {/* Background Watermark */}
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center md:ml-72">
+            <img src="/vic.png" className="w-[500px] md:w-[700px] opacity-[0.2]" alt="" />
+        </div>
+
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
            <div className="flex items-center gap-4">

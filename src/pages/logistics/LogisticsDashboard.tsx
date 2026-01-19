@@ -79,7 +79,7 @@ export const LogisticsDashboard = () => {
                                 <th className="hidden sm:table-cell text-left py-3 md:py-4 px-3 md:px-6 font-semibold text-gray-500 text-xs uppercase">Type</th>
                                 <th className="text-left py-3 md:py-4 px-3 md:px-6 font-semibold text-gray-500 text-xs uppercase">Status</th>
                                 <th className="hidden md:table-cell text-left py-3 md:py-4 px-3 md:px-6 font-semibold text-gray-500 text-xs uppercase">Assigned</th>
-                                <th className="hidden lg:table-cell text-left py-3 md:py-4 px-3 md:px-6 font-semibold text-gray-500 text-xs uppercase">Contact</th>
+                                <th className="text-left py-3 md:py-4 px-3 md:px-6 font-semibold text-gray-500 text-xs uppercase">Contact</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -97,7 +97,7 @@ export const LogisticsDashboard = () => {
                                         </span>
                                     </td>
                                     <td className="hidden md:table-cell py-3 md:py-4 px-3 md:px-6 text-gray-500 text-xs md:text-sm">{item.profiles?.full_name || 'Unassigned'}</td>
-                                    <td className="hidden lg:table-cell py-3 md:py-4 px-3 md:px-6 text-gray-500 capitalize text-xs md:text-sm">{item.contact_method || '-'}</td>
+                                    <td className="py-3 md:py-4 px-3 md:px-6 text-gray-500 text-xs md:text-sm">{item.contact || '-'}</td>
                                 </tr>
                             ))}
                              {filteredData.length === 0 && (

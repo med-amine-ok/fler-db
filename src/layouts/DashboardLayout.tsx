@@ -45,7 +45,8 @@ export const DashboardLayout = () => {
       <main className="flex-1 md:ml-72 flex flex-col min-h-screen relative">
         {/* Background Watermark */}
         <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center md:ml-72">
-            <img src="/vic.png" className="w-[500px] md:w-[700px] opacity-[0.2]" alt="" />
+            <img src="/vic.png" className="block md:hidden w-[500px] opacity-[0.2]" alt="" />
+            <img src="/vic_long.png" className="hidden md:block w-[1000px] opacity-[0.2]" alt="" />
         </div>
 
         {/* Top Header */}

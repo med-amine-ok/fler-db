@@ -20,6 +20,12 @@ export const Home = () => {
   const [teams, setTeams] = useState(mockTeams);
   const [loading, setLoading] = useState(true);
 
+  const EVENT_LOGOS: Record<string, string> = {
+    'AEC': '/AEC.png',
+    'Polymaze': '/polymaze.png',
+    'Charity': '/charity.png',
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -67,7 +73,7 @@ export const Home = () => {
             date: e.created_at,
             status: e.status as any || 'planned',
             description: '',
-            logo: undefined
+            logo: EVENT_LOGOS[e.name]
          })));
       }
 

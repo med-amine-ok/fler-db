@@ -43,6 +43,7 @@ export const DashboardLayout = () => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
 
+
   const messages = [
     "Your hard work is paving the way for a brighter future. Keep it up! 🚀",
     "Every small step counts. You're doing great! ✨",
@@ -53,8 +54,25 @@ export const DashboardLayout = () => {
     "You are making a difference today! Keep shining. ☀️",
     "Don't watch the clock; do what it does. Keep going. ⏰",
     "Your positive attitude is contagious. Thank you! 😊",
-    "Great things never came from comfort zones. Push forward! 🔥"
+    "Great things never came from comfort zones. Push forward! 🔥",
+    "Building strong partnerships is the bridge to our community's success! 🤝",
+    "Our external relations team is the face of our mission. Shine on! 🌍",
+    "Sponsorships turn our dreams into reality. Great job securing that support! 💼",
+    "Strategic alliances are the foundation of our sustainable growth. 🏗️",
+    "Every new sponsor brings us closer to our goal. Keep pitching! 🎯",
+    "Nurturing relationships is at the heart of everything we do. ❤️",
+    "Innovation distinguishes between a leader and a follower. Keep leading! 💡",
+    "Teamwork makes the dream work! 🤝",
+    "Your contribution is invaluable to our growth. 📈",
+    "Keep your head high and your goals higher. 🏔️",
+    "Collaboration is the key to unlocking new opportunities. 🔑",
+    "Your energy and passion are what drive us forward. ⚡",
+    "Success is better when shared. Thank you for being a team player! 🏆",
+    "Persistence guarantees that results are inevitable. 🏁",
+    "Focus on being productive instead of busy. 🐝",
+    "The best way to predict the future is to create it. 🎨"
   ];
+
 
   const handleBellClick = () => {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];

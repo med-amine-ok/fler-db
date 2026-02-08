@@ -72,5 +72,7 @@ export const ALLOWED_EMAILS = [
     'djouhaina.lazazga@g.enp.edu.dz',
     'mohamed.lacheb@g.enp.edu.dz',
     'alaa.abada@g.enp.edu.dz',
+    'hafsa.bouray@g.enp.edu.dz',
+    'nourhane.tis@g.enp.edu.dz',
     'lyna.bouchama@g.enp.edu.dz',
 ].map(email => email.toLowerCase().trim());

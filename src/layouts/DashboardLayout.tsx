@@ -1,6 +1,6 @@
 import { Sidebar } from '../components/Sidebar';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, Quote, Sparkles, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Modal } from '../components/ui/Modal';
@@ -118,7 +118,7 @@ export const DashboardLayout = () => {
 
           <div className="flex items-center gap-2 md:gap-4">
 
-            <button 
+            <button
               onClick={handleBellClick}
               className="relative p-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-primary transition-all"
             >
@@ -147,21 +147,39 @@ export const DashboardLayout = () => {
       <Modal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
-        title="Thinking of you 🌟"
-        size="sm"
+        title="FLER 2026"
+        size="md"
       >
-        <div className="text-center p-4">
-          <p className="text-lg font-medium text-gray-700 leading-relaxed italic">
-            "{notificationMessage}"
-          </p>
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => setIsNotificationOpen(false)}
-              className="px-6 py-2 bg-primary text-white rounded-full font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
-            >
-              Thanks! 💙
-            </button>
+        <div className="flex flex-col items-center justify-center py-8 px-6">
+          {/* Decorative Icon */}
+          <div className="mb-8 relative">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-60"></div>
+            <div className="bg-primary/10 p-4 rounded-full relative z-10">
+              <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+            </div>
           </div>
+
+          {/* Message with Decorative Quotes */}
+          <div className="relative max-w-sm text-center mb-10">
+            <Quote className="absolute -top-6 -left-2 w-8 h-8 text-primary/10 transform -scale-x-100" />
+
+            <p className="text-xl md:text-2xl font-serif font-medium text-gray-800 leading-relaxed tracking-wide italic">
+              {notificationMessage}
+            </p>
+
+            <Quote className="absolute -bottom-6 -right-2 w-8 h-8 text-primary/10" />
+          </div>
+
+          {/* Button */}
+          <button
+            onClick={() => setIsNotificationOpen(false)}
+            className="group relative px-8 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-full font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full sm:w-auto"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2 text-base tracking-wide">
+              Thanks! <Heart className="w-5 h-5 fill-current animate-pulse text-red-400" />
+            </span>
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+          </button>
         </div>
       </Modal>
     </div>

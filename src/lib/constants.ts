@@ -16,6 +16,7 @@ export const ALLOWED_EMAILS = [
     'asma.ghanem@g.enp.edu.dz',
     'fella_maria.rezak@g.enp.edu.dz',
     'aya.hireche@g.enp.edu.dz',
+    'aya.kebli@g.enp.edu.dz',
     'yasmine.ait_ahmed@g.enp.edu.dz',
     'lyna.khoubzi@g.enp.edu.dz',
     'saad.lebdi@g.enp.edu.dz',

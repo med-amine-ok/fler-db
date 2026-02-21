@@ -23,6 +23,8 @@ export const Database = () => {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods'];
 
@@ -30,6 +32,7 @@ export const Database = () => {
     fetchData();
     getCurrentUser();
     fetchEvents();
+    fetchUsers();
   }, [activeTab]);
 
   const getCurrentUser = async () => {
@@ -40,6 +43,11 @@ export const Database = () => {
   const fetchEvents = async () => {
     const { data } = await supabase.from('events').select('id, name');
     setEvents(data || []);
+  };
+
+  const fetchUsers = async () => {
+    const { data } = await supabase.from('profiles').select('id, full_name');
+    setUsers(data || []);
   };
 
   const fetchData = async () => {
@@ -120,9 +128,11 @@ export const Database = () => {
     }
   };
 
-  const filteredData = data.filter(item =>
-    JSON.stringify(item).toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => {
+  const filteredData = data.filter(item => {
+    const matchesSearch = JSON.stringify(item).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
+    return matchesSearch && matchesUser;
+  }).sort((a, b) => {
     switch (sortBy) {
       case 'newest':
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -507,6 +517,20 @@ export const Database = () => {
                 Event/Type
               </Button>
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by User</label>
+            <select
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white text-sm"
+              value={selectedUser || ''}
+              onChange={(e) => setSelectedUser(e.target.value || null)}
+            >
+              <option value="">All Users</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.full_name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="pt-4 mt-auto">

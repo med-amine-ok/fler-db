@@ -15,7 +15,7 @@ export const Badge = ({ children, variant = 'default', className }: BadgeProps) 
         {
           'bg-gray-100 text-gray-600': variant === 'default',
           'bg-secondary/10 text-secondary': variant === 'success',
-          'bg-orange-50 text-orange-600': variant === 'warning',
+          'bg-yellow-50 text-yellow-400': variant === 'warning',
           'bg-red-50 text-red-600': variant === 'error',
           'bg-transparent border border-gray-200 text-gray-500': variant === 'outline',
         },

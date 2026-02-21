@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, Database as DatabaseIcon, Loader2 } from 'lucide-react';
+import { Search, Filter, Plus, Database as DatabaseIcon, Loader2, Edit2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -18,12 +18,29 @@ export const Database = () => {
   const [loading, setLoading] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'status' | 'event'>('newest');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods'];
 
   useEffect(() => {
     fetchData();
+    getCurrentUser();
+    fetchEvents();
   }, [activeTab]);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUser(user);
+  };
+
+  const fetchEvents = async () => {
+    const { data } = await supabase.from('events').select('id, name');
+    setEvents(data || []);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -54,10 +71,52 @@ export const Database = () => {
       if (error) throw error;
       setData(result || []);
 
-    } catch (e) {
-      console.error("Error fetching database:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (item: any) => {
+    setEditingItem({ ...item });
+    setIsEditSheetOpen(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    setIsUpdating(true);
+    try {
+      const table = activeTab === 'Companies' ? 'companies' : 'logistics';
+      const payload: any = {
+        name: editingItem.name,
+        status: editingItem.status,
+        notes: editingItem.notes,
+        contact: editingItem.contact,
+        contact_method: editingItem.contact_method,
+      };
+
+      if (activeTab === 'Companies') {
+        payload.event_id = editingItem.event_id ? parseInt(editingItem.event_id) : null;
+      } else {
+        payload.type = editingItem.type;
+      }
+
+      const { error } = await (supabase as any)
+        .from(table)
+        .update(payload)
+        .eq('id', editingItem.id);
+
+      if (error) throw error;
+
+      setIsEditSheetOpen(false);
+      setEditingItem(null);
+      fetchData();
+    } catch (error: any) {
+      console.error('Error updating record:', error);
+      alert('Failed to update record: ' + error.message);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -95,25 +154,26 @@ export const Database = () => {
 
     if (activeTab === 'Companies') {
       return (
-        <tr className="bg-gray-50/50 border-b border-gray-100">
-          <th className={commonClasses}>Company</th>
-          <th className={commonClasses}>Event</th>
-          <th className={commonClasses}>Status</th>
-          <th className={commonClasses}>Method</th>
-          <th className={commonClasses}>Notes</th>
-          <th className={commonClasses}>Assigned</th>
+        <tr className="border-b border-gray-100 bg-gray-50/50">
+          <th className={clsx(commonClasses, "w-[20%]")}>Company</th>
+          <th className={clsx(commonClasses, "w-[15%]")}>Event</th>
+          <th className={clsx(commonClasses, "w-[12%]")}>Status</th>
+          <th className={clsx(commonClasses, "w-[12%]")}>Method</th>
+          <th className={clsx(commonClasses, "w-[21%]")}>Notes</th>
+          <th className={clsx(commonClasses, "w-[15%]")}>Assigned</th>
+          <th className={clsx(commonClasses, "w-[5%] text-right")}></th>
         </tr>
       );
     }
 
     // Logistics (Hotels, Foods, Goodies)
     return (
-      <tr className="bg-gray-50/50 border-b border-gray-100">
-        <th className={commonClasses}>Name</th>
-        <th className={commonClasses}>Status</th>
-        <th className={commonClasses}>Type</th>
-        <th className={commonClasses}>Contact</th>
-        <th className={commonClasses}>Assigned</th>
+      <tr className="border-b border-gray-100 bg-gray-50/50">
+        <th className={clsx(commonClasses, "w-[40%]")}>Name</th>
+        <th className={clsx(commonClasses, "w-[15%]")}>Status</th>
+        <th className={clsx(commonClasses, "w-[15%]")}>Type</th>
+        <th className={clsx(commonClasses, "w-[25%]")}>Assigned</th>
+        <th className={clsx(commonClasses, "w-[5%] text-right")}></th>
       </tr>
     );
   };
@@ -122,7 +182,7 @@ export const Database = () => {
     if (loading) {
       return (
         <tr>
-          <td colSpan={6} className="text-center py-12 md:py-16">
+          <td colSpan={7} className="text-center py-12 md:py-16">
             <Loader2 className="animate-spin mx-auto text-primary" size={30} />
           </td>
         </tr>
@@ -132,7 +192,7 @@ export const Database = () => {
     if (filteredData.length === 0) {
       return (
         <tr>
-          <td colSpan={6} className="text-center py-12 md:py-16 text-gray-400">
+          <td colSpan={7} className="text-center py-12 md:py-16 text-gray-400">
             <div className="flex flex-col items-center gap-2">
               <DatabaseIcon size={40} className="opacity-20" />
               <p className="text-xs md:text-sm">No records found for {activeTab}</p>
@@ -142,48 +202,105 @@ export const Database = () => {
       );
     }
 
-    const rowClasses = "border-b border-gray-50 hover:bg-gray-50/80 transition-colors group";
-    const cellClasses = "py-3 md:py-4 px-3 md:px-6 text-xs md:text-sm text-gray-600 group-hover:text-gray-900";
-
+    const rowClasses = "border-b border-gray-50 hover:bg-primary/[0.02] transition-colors group";
+    const cellClasses = "py-4 px-3 md:px-6 text-sm text-gray-600 transition-colors truncate";
 
     if (activeTab === 'Companies') {
       return (filteredData as any[]).map((item) => (
         <tr key={item.id} className={rowClasses}>
-          <td className={clsx(cellClasses, "font-medium text-text whitespace-nowrap")}>{item.name}</td>
-          <td className={clsx(cellClasses, "whitespace-nowrap")}>{item.events?.name || <span className="text-gray-300 italic">-</span>}</td>
-          <td className={clsx(cellClasses, "whitespace-nowrap")}>
+          <td className={clsx(cellClasses, "font-semibold text-gray-900")}>
+            <div className="flex flex-col min-w-0">
+              <span className="truncate">{item.name}</span>
+              <span className="text-[10px] text-gray-400 font-normal md:hidden truncate uppercase tracking-tight">{item.profiles?.full_name || 'Unassigned'}</span>
+            </div>
+          </td>
+          <td className={cellClasses}>
+            <span className="text-gray-500 text-xs truncate block">{item.events?.name || '-'}</span>
+          </td>
+          <td className={cellClasses}>
             <Badge variant={
-              item.status === 'contacted' ? 'success' :
-                item.status === 'rejected' ? 'error' : 'default'
-            } className="text-xs">
+              (item.status === 'signed' || item.status === 'contacted') ? 'success' :
+                item.status === 'rejected' ? 'error' :
+                  (!item.status || item.status === 'pending') ? 'warning' : 'default'
+            } className="text-[9.5px] uppercase font-bold tracking-tighter px-2 py-0.5">
               {item.status || 'Pending'}
             </Badge>
           </td>
-          <td className={clsx(cellClasses, "capitalize whitespace-nowrap")}>{item.contact_method || '-'}</td>
-          <td className={clsx(cellClasses, "whitespace-nowrap max-w-[200px] truncate")} title={item.notes || ''}>{item.notes || '-'}</td>
-          <td className={clsx(cellClasses, "whitespace-nowrap")}>{item.profiles?.full_name || <span className="text-gray-300 italic">Unassigned</span>}</td>
-
+          <td className={clsx(cellClasses, "capitalize text-gray-400 text-xs")}>{item.contact_method || '-'}</td>
+          <td className={cellClasses}>
+            <p className="line-clamp-1 text-[11px] text-gray-400 italic" title={item.notes || ''}>
+              {item.notes || '-'}
+            </p>
+          </td>
+          <td className={cellClasses}>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-[9px] font-bold text-primary shrink-0">
+                {(item.profiles?.full_name || 'U').charAt(0)}
+              </div>
+              <span className="truncate max-w-[80px] text-[11px] font-medium text-gray-600">
+                {item.profiles?.full_name || 'Unassigned'}
+              </span>
+            </div>
+          </td>
+          <td className={clsx(cellClasses, "text-right")}>
+            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+              {currentUser && item.assigned_user_id === currentUser.id ? (
+                <button
+                  className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                  onClick={() => handleEdit(item)}
+                >
+                  <Edit2 size={14} />
+                </button>
+              ) : (
+                <div className="w-7 h-7" />
+              )}
+            </div>
+          </td>
         </tr>
       ));
     }
 
-
-
     // Logistics
     return (filteredData as any[]).map((item) => (
       <tr key={item.id} className={rowClasses}>
-        <td className={clsx(cellClasses, "font-medium text-text whitespace-nowrap")}>{item.name}</td>
-        <td className={clsx(cellClasses, "whitespace-nowrap")}>
-          <Badge variant={item.status === 'booked' ? 'success' : item.status === 'available' ? 'default' : 'warning'} className="text-xs">
+        <td className={clsx(cellClasses, "font-semibold text-gray-900")}>{item.name}</td>
+        <td className={cellClasses}>
+          <Badge variant={
+            item.status === 'booked' ? 'success' :
+              (!item.status || item.status === 'pending') ? 'warning' :
+                item.status === 'available' ? 'default' : 'warning'
+          } className="text-[9px] uppercase font-bold px-2 py-0.5">
             {item.status || 'Pending'}
           </Badge>
         </td>
-        <td className={clsx(cellClasses, "capitalize whitespace-nowrap")}>{item.type}</td>
-        <td className={clsx(cellClasses, "whitespace-nowrap")}>{item.contact || '-'}</td>
-        <td className={clsx(cellClasses, "whitespace-nowrap")}>{item.profiles?.full_name || <span className="text-gray-300 italic">Unassigned</span>}</td>
+        <td className={clsx(cellClasses, "capitalize text-gray-400 text-xs")}>{item.type}</td>
+        <td className={cellClasses}>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-[9px] font-bold text-primary shrink-0">
+              {(item.profiles?.full_name || 'U').charAt(0)}
+            </div>
+            <span className="truncate max-w-[80px] text-[11px] font-medium text-gray-600">
+              {item.profiles?.full_name || 'Unassigned'}
+            </span>
+          </div>
+        </td>
+        <td className={clsx(cellClasses, "text-right")}>
+          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+            {currentUser && item.assigned_user_id === currentUser.id ? (
+              <button
+                className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                onClick={() => handleEdit(item)}
+              >
+                <Edit2 size={14} />
+              </button>
+            ) : (
+              <div className="w-7 h-7" />
+            )}
+          </div>
+        </td>
       </tr>
     ));
-  }
+  };
 
   const renderMobileCards = () => {
     if (loading) {
@@ -207,9 +324,10 @@ export const Database = () => {
             <p className="text-xs text-gray-500 mt-0.5">{item.events?.name || item.type || 'General'}</p>
           </div>
           <Badge variant={
-            (item.status === 'signed' || item.status === 'booked') ? 'success' :
-              (item.status === 'rejected') ? 'error' : 'default'
-          } className="scale-90 origin-right">
+            (item.status === 'signed' || item.status === 'booked' || item.status === 'contacted') ? 'success' :
+              (item.status === 'rejected') ? 'error' :
+                (!item.status || item.status === 'pending') ? 'warning' : 'default'
+          } className="scale-90 origin-right shrink-0">
             {item.status || 'Pending'}
           </Badge>
         </div>
@@ -249,9 +367,16 @@ export const Database = () => {
           </div>
         </div>
 
-        {/* <Button size="sm" variant="outline" className="w-full mt-2 h-9 text-xs">
-            View Details
-        </Button> */}
+        {currentUser && item.assigned_user_id === currentUser.id && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full mt-2 h-9 text-xs gap-2 border-primary/20 text-primary"
+            onClick={() => handleEdit(item)}
+          >
+            <Edit2 size={14} /> Edit Contact
+          </Button>
+        )}
       </Card>
     ));
   };
@@ -310,12 +435,12 @@ export const Database = () => {
         </div>
 
         {/* Desktop Table */}
-        <div className="hidden md:block overflow-x-auto flex-1">
-          <table className="w-full min-w-fit">
+        <div className="hidden md:block flex-1">
+          <table className="w-full table-fixed">
             <thead>
               {renderTableHeaders()}
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-50">
               {renderTableRows()}
             </tbody>
           </table>
@@ -388,6 +513,120 @@ export const Database = () => {
             <Button className="w-full" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>
           </div>
         </div>
+      </Sheet>
+
+      {/* Edit Sheet */}
+      <Sheet
+        isOpen={isEditSheetOpen}
+        onClose={() => setIsEditSheetOpen(false)}
+        title={`Edit ${activeTab === 'Companies' ? 'Company' : activeTab.slice(0, -1)}`}
+      >
+        {editingItem && (
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary"
+                value={editingItem.name || ''}
+                onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
+              />
+            </div>
+
+            {activeTab === 'Companies' ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event</label>
+                <select
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white"
+                  value={editingItem.event_id || ''}
+                  onChange={e => setEditingItem({ ...editingItem, event_id: e.target.value })}
+                >
+                  <option value="">Select an event...</option>
+                  {events.map((event) => (
+                    <option key={event.id} value={event.id}>{event.name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white"
+                  value={editingItem.type || ''}
+                  onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
+                >
+                  <option value="hotel">Hotel</option>
+                  <option value="food">Food</option>
+                  <option value="goodies">Goodies</option>
+                  <option value="salle">Salle</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white"
+                value={editingItem.status || ''}
+                onChange={e => setEditingItem({ ...editingItem, status: e.target.value })}
+              >
+                {activeTab === 'Companies' ? (
+                  <>
+                    <option value="contacted">Contacted</option>
+                    <option value="pending">Pending</option>
+                    <option value="signed">Signed</option>
+                    <option value="rejected">Rejected</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="available">Available</option>
+                    <option value="pending">Pending</option>
+                    <option value="booked">Booked</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contact Method</label>
+              <select
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white"
+                value={editingItem.contact_method || ''}
+                onChange={e => setEditingItem({ ...editingItem, contact_method: e.target.value })}
+              >
+                <option value="call">Call</option>
+                <option value="email">Email</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="outing">Outing</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contact Info</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary"
+                value={editingItem.contact || ''}
+                onChange={e => setEditingItem({ ...editingItem, contact: e.target.value })}
+                placeholder="Phone, email, or name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <textarea
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary min-h-[100px]"
+                value={editingItem.notes || ''}
+                onChange={e => setEditingItem({ ...editingItem, notes: e.target.value })}
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isUpdating}>
+              {isUpdating ? <Loader2 className="animate-spin" size={18} /> : 'Update Record'}
+            </Button>
+          </form>
+        )}
       </Sheet>
     </div>
   );

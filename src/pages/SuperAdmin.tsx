@@ -11,15 +11,12 @@ import {
     Download,
     Mail,
     Zap,
-    BarChart3,
     RefreshCw,
     Trophy,
     History,
     Lock,
     ArrowUpRight,
-    ArrowDownRight,
-    PieChart,
-    Layout
+    PieChart
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -64,7 +61,7 @@ export const SuperAdmin = () => {
         signedDeals: 0
     });
     const [users, setUsers] = useState<UserProfile[]>([]);
-    const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
+    const [, setRecentActivities] = useState<ActivityItem[]>([]);
     const [allActivities, setAllActivities] = useState<ActivityItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -246,7 +243,7 @@ export const SuperAdmin = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     icon={<Users className="text-blue-600" />}
-                    label="Team Force"
+                    label="Team Team"
                     value={stats.totalUsers}
                     trend="Active Personnel"
                     color="blue"
@@ -294,7 +291,7 @@ export const SuperAdmin = () => {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
                                     type="text"
-                                    placeholder="Filter force..."
+                                    placeholder="Filter Team..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-9 pr-4 py-2 bg-gray-100/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 w-full sm:w-56 transition-all text-sm font-semibold"
@@ -545,7 +542,7 @@ const TeamBar = ({ label, count, total, color }: any) => {
     return (
         <div className="space-y-2">
             <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">{label} Force</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">{label} Team</span>
                 <span className="text-xs font-black text-text">{count} ({Math.round(percentage)}%)</span>
             </div>
             <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">

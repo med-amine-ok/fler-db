@@ -18,18 +18,19 @@ import { SponsoringEvents } from './pages/sponsoring/SponsoringEvents';
 import { SponsoringDashboard } from './pages/sponsoring/SponsoringDashboard';
 import { SponsoringForm } from './pages/sponsoring/SponsoringForm';
 import { DatabaseForm } from './pages/DatabaseForm';
-import { ALLOWED_EMAILS } from './lib/constants';
+import { SuperAdmin } from './pages/SuperAdmin';
+import { ALLOWED_EMAILS, SUPER_ADMIN_EMAIL } from './lib/constants';
 
 const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; error?: string }> => {
   try {
     const userEmail = user.email?.toLowerCase().trim();
-    
+
     console.log('Profile check for user:', userEmail);
-    
+
     // SECURITY: Strictly enforce email whitelist at the core level
     if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
       console.error('Security Alert: Unauthorized email attempted access:', user.email);
-      return { success: false, error: 'unauthorized' }; 
+      return { success: false, error: 'unauthorized' };
     }
 
     console.log('Email authorized, checking profile...');
@@ -59,7 +60,7 @@ const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; err
           .then(() => {
             console.log('Background profile created successfully');
           })
-         
+
       }
     } catch (timeoutErr) {
       console.log('Profile check timed out - creating in background...');
@@ -74,15 +75,15 @@ const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; err
         .then(() => {
           console.log('Background profile created successfully');
         })
-        
+
     }
-    
+
     console.log('Profile check completed - proceeding with login');
-    return { success: true }; 
+    return { success: true };
   } catch (err) {
-      console.error('Profile check error:', err);
-      // Allow login even if profile check fails - it will be created in background
-      return { success: true };
+    console.error('Profile check error:', err);
+    // Allow login even if profile check fails - it will be created in background
+    return { success: true };
   }
 };
 
@@ -110,9 +111,9 @@ function App() {
     // Check active session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
-      
+
       console.log('Initial session check:', session ? 'Session found' : 'No session');
-      
+
       if (session?.user) {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
@@ -147,10 +148,10 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
-      
+
       console.log('Auth state change event:', event);
       console.log('New session:', session ? 'Session exists' : 'No session');
-      
+
       if (session?.user) {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
@@ -189,7 +190,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={session ? <Navigate to="/home" replace /> : <Auth />} />
-        
+
         {/* Protected Dashboard Routes */}
         <Route element={
           <ProtectedRoute session={session}>
@@ -201,7 +202,7 @@ function App() {
           <Route path="/events/:id/dossier" element={<EventDossier />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:id/report" element={<TeamReport />} />
-          
+
           {/* Logistics Routes */}
           <Route path="/teams/logistics" element={<LogisticsDashboard />} />
           <Route path="/teams/logistics/add" element={<LogisticsForm />} />
@@ -214,6 +215,11 @@ function App() {
           <Route path="/database" element={<Database />} />
           <Route path="/database/add" element={<DatabaseForm />} />
           <Route path="/profile" element={<Profile />} />
+
+          {/* Super Admin Route */}
+          {session?.user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL && (
+            <Route path="/super-admin" element={<SuperAdmin />} />
+          )}
         </Route>
 
         {/* Fallback */}

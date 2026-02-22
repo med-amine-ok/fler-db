@@ -15,7 +15,7 @@ export interface Database {
                     full_name: string | null
                     email: string | null
                     phone_number: string | null
-                    team: 'logistics' | 'sponsoring' | null
+                    team: 'logistics' | 'sponsoring' | 'both' | null
                     created_at: string
                     ranking: number | null
                 }
@@ -24,7 +24,7 @@ export interface Database {
                     full_name?: string | null
                     email?: string | null
                     phone_number?: string | null
-                    team?: 'logistics' | 'sponsoring' | null
+                    team?: 'logistics' | 'sponsoring' | 'both' | null
                     created_at?: string
                     ranking?: number | null
                 }
@@ -33,7 +33,7 @@ export interface Database {
                     full_name?: string | null
                     email?: string | null
                     phone_number?: string | null
-                    team?: 'logistics' | 'sponsoring' | null
+                    team?: 'logistics' | 'sponsoring' | 'both' | null
                     created_at?: string
                     ranking?: number | null
                 }
@@ -159,7 +159,7 @@ export interface Database {
                     id: string
                     full_name: string | null
                     email: string | null
-                    team: 'logistics' | 'sponsoring' | null
+                    team: 'logistics' | 'sponsoring' | 'both' | null
                     total_points: number
                     total_activities: number
                     call_count: number

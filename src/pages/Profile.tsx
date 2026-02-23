@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Shield, User, Award, Calendar as CalendarIcon, Edit2, Save, X } from 'lucide-react';
+import { Mail, Shield, User, Award, Calendar as CalendarIcon, Edit2, Save, X, Phone, UserCheck, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -10,15 +10,13 @@ import type { Database } from '../lib/database.types';
 type ProfileRecord = Database['public']['Tables']['profiles']['Row'];
 type ActivityRecord = Database['public']['Tables']['activities']['Row'];
 
-
-
 export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileRecord | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [activities, setActivities] = useState<ActivityRecord[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const [editForm, setEditForm] = useState({
     full_name: '',
     phone_number: '',
@@ -37,7 +35,7 @@ export const Profile = () => {
         setError('No authenticated user found.');
         return;
       }
-      
+
       setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || null);
 
       const { data: profileData, error: profileError } = await supabase
@@ -50,7 +48,7 @@ export const Profile = () => {
         console.error('Profile fetch error:', profileError);
         throw profileError;
       }
-      
+
       if (profileData) {
         const typedProfile = profileData as unknown as ProfileRecord;
         setProfile(typedProfile);
@@ -67,7 +65,7 @@ export const Profile = () => {
         .order('created_at', { ascending: false });
 
       if (activitiesError) {
-         console.warn('Activities fetch error (non-critical):', activitiesError);
+        console.warn('Activities fetch error (non-critical):', activitiesError);
       }
       const fetchedActivities = (activitiesData || []) as unknown as ActivityRecord[];
       setActivities(fetchedActivities);
@@ -96,7 +94,7 @@ export const Profile = () => {
         .eq('id', profile.id);
 
       if (error) throw error;
-      
+
       setProfile({ ...profile, ...editForm });
       setIsEditing(false);
     } catch (error) {
@@ -106,10 +104,13 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-500">Loading profile...</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-6">
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-gray-400 font-medium animate-pulse">Synchronizing your profile...</p>
         </div>
       </div>
     );
@@ -117,10 +118,15 @@ export const Profile = () => {
 
   if (!profile || error) {
     return (
-      <div className="p-8 text-center space-y-4">
-        <div className="text-red-500 font-bold text-xl">Unable to load profile</div>
-        {error && <div className="p-4 bg-red-50 text-red-700 rounded-lg max-w-lg mx-auto border border-red-200">{error}</div>}
-        <Button onClick={() => window.location.reload()} variant="outline">Retry</Button>
+      <div className="p-12 text-center max-w-lg mx-auto">
+        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <X size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-text mb-2">Something went wrong</h2>
+        <p className="text-gray-500 mb-8">{error || 'We couldn\'t load your profile information. Please check your connection and try again.'}</p>
+        <Button onClick={() => window.location.reload()} variant="outline" className="px-8">
+          Retry Connection
+        </Button>
       </div>
     );
   }
@@ -128,211 +134,285 @@ export const Profile = () => {
   const currentScore = calculateScore();
 
   return (
-    <div className="w-full space-y-6 md:space-y-8 animate-fade-in">
-      {/* Hero Header Section */}
-      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-primary via-blue-500 to-secondary p-6 md:p-12 text-white shadow-lg md:shadow-xl">
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-        
-        <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-12">
-          <div className="flex-shrink-0">
+    <div className="w-full max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+      {/* Refined Header Section */}
+      <div className="relative bg-white rounded-[2rem] border border-gray-100 p-8 md:p-10 shadow-sm overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-primary/10 transition-colors duration-500"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full -ml-16 -mb-16 blur-3xl group-hover:bg-secondary/10 transition-colors duration-500"></div>
+
+        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-8">
+          <div className="relative group/avatar">
             {avatarUrl ? (
-              <img 
-                src={avatarUrl} 
-                alt="Profile" 
-                className="w-24 h-24 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl object-cover bg-white/20 backdrop-blur"
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-xl object-cover"
               />
             ) : (
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-2xl">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-gradient-to-br from-gray-50 to-gray-100 border-4 border-white shadow-xl flex items-center justify-center text-primary text-3xl md:text-4xl font-black">
                 {profile.full_name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase()}
               </div>
             )}
+            <div className="absolute -bottom-2 -right-2 bg-secondary text-white p-2 rounded-xl shadow-lg border-2 border-white">
+              <UserCheck size={16} />
+            </div>
           </div>
-          
-          <div className="flex-1 text-center md:text-left w-full">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-3 md:mb-2">
-              <h1 className="text-2xl md:text-5xl font-bold line-clamp-2">{profile.full_name || 'User Profile'}</h1>
+
+          <div className="flex-1 text-center md:text-left pt-2">
+            <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-text">
+                {profile.full_name || 'User Profile'}
+              </h1>
               {!isEditing && (
-                <button 
+                <button
                   onClick={() => setIsEditing(true)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl transition-all font-semibold text-sm border border-gray-100 shadow-sm"
                 >
-                  <Edit2 size={20} />
+                  <Edit2 size={14} />
+                  Edit Profile
                 </button>
               )}
             </div>
-            
-            <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-3 mt-3 md:mt-4">
-              <span className="flex items-center gap-2 text-white/90 text-xs md:text-sm font-medium break-all">
-                <Mail size={16} /> {profile.email}
-              </span>
+
+            <div className="flex flex-wrap justify-center md:justify-start gap-3">
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50/50 text-primary rounded-xl text-sm font-semibold border border-blue-100/50">
+                <Mail size={16} />
+                {profile.email}
+              </div>
               {profile.team && (
-                <span className="flex items-center gap-2 text-white/90 text-xs md:text-sm font-medium px-3 py-1 bg-white/20 rounded-full">
-                  <Shield size={16} /> {profile.team.charAt(0).toUpperCase() + profile.team.slice(1)} Team
-                </span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50/50 text-secondary rounded-xl text-sm font-semibold border border-emerald-100/50">
+                  <Shield size={16} />
+                  {profile.team.charAt(0).toUpperCase() + profile.team.slice(1)} Team
+                </div>
               )}
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-50/50 text-gray-500 rounded-xl text-sm font-semibold border border-gray-100/50">
+                <Clock size={16} />
+                Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        {/* Left Column: Profile Info */}
-        <div className="lg:col-span-1 space-y-6 md:space-y-7">
-          {/* Personal Information Card */}
-          <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-white">
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h3 className="text-base md:text-lg font-bold text-text flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
-                  <User size={20} className="text-primary" />
-                </div>
-                <span className="hidden sm:inline">Profile Info</span>
-              </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Personal Info Box - Order 1 */}
+        <div className="lg:col-span-2 space-y-8 order-1">
+          <Card className="p-8 md:p-10 border border-gray-100/60 shadow-xl shadow-gray-200/20 rounded-[2rem] bg-white relative overflow-hidden">
+            <div className="flex items-center justify-between mb-10">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-text tracking-tight">Personal Information</h3>
+                <p className="text-gray-400 text-sm font-medium">Keep your account details up to date</p>
+              </div>
               {isEditing && (
-                <button 
+                <button
                   onClick={() => setIsEditing(false)}
-                  className="p-2 hover:bg-gray-200 rounded-xl transition-all duration-200"
+                  className="p-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-2xl transition-all"
                 >
-                  <X size={18} className="text-gray-600" />
+                  <X size={20} />
                 </button>
               )}
             </div>
-            
-            <div className="space-y-5 md:space-y-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
               {isEditing ? (
-                <>
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-2 md:mb-3 uppercase tracking-wider">Full Name</label>
-                    <Input 
-                      value={editForm.full_name} 
-                      onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                      placeholder="Enter full name"
-                      className="rounded-xl border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
+                <div className="col-span-2 space-y-8 animate-in slide-in-from-top-4 duration-300">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Full Name</label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                          <User size={18} />
+                        </div>
+                        <Input
+                          value={editForm.full_name}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
+                          placeholder="Your full name"
+                          className="pl-12 py-3.5 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all text-base font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Phone Number</label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                          <Phone size={18} />
+                        </div>
+                        <Input
+                          value={editForm.phone_number}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                          placeholder="+213 --- --- ---"
+                          className="pl-12 py-3.5 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all text-base font-medium"
+                        />
+                      </div>
+                    </div>
+                    {/* Integrated non-editable items for context */}
+                    <div className="space-y-2 opacity-60">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Assigned Team</p>
+                      <div className="p-4 rounded-2xl bg-gray-100/50 border border-transparent flex items-center justify-between">
+                        <p className="text-sm font-bold text-text capitalize">{profile.team || 'Unassigned'}</p>
+                        <Shield size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 opacity-60">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Activity Records</p>
+                      <div className="p-4 rounded-2xl bg-gray-100/50 border border-transparent flex items-center justify-between">
+                        <p className="text-sm font-bold text-text">{activities.length} Logs</p>
+                        <CalendarIcon size={14} className="text-gray-400" />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-2 md:mb-3 uppercase tracking-wider">Phone Number</label>
-                    <Input 
-                      value={editForm.phone_number} 
-                      onChange={(e) => setEditForm(prev => ({ ...prev, phone_number: e.target.value }))}
-                      placeholder="+1 (555) 000-0000"
-                      className="rounded-xl border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={handleUpdateProfile}
+                      className="flex-1 py-4 gap-2 bg-text hover:bg-black text-white rounded-2xl shadow-xl shadow-gray-200 text-base font-bold transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <Save size={18} /> Update Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditing(false)}
+                      className="px-8 py-4 rounded-2xl font-bold"
+                    >
+                      Cancel
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={handleUpdateProfile}
-                    className="w-full mt-4 md:mt-6 gap-2 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg rounded-xl"
-                  >
-                    <Save size={16} /> Save Changes
-                  </Button>
-                </>
+                </div>
               ) : (
                 <>
-                  <div className="pb-5 md:pb-6 border-b border-gray-100">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</p>
-                    <p className="text-base md:text-lg font-semibold text-text">{profile.full_name || '—'}</p>
+                  <div className="group space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                      Full Name
+                    </p>
+                    <div className="p-5 rounded-2xl bg-gray-50/50 border border-gray-50 group-hover:bg-white group-hover:border-primary/20 group-hover:shadow-md transition-all duration-300">
+                      <p className="text-lg font-bold text-text">{profile.full_name || '—'}</p>
+                    </div>
                   </div>
-                  <div className="pb-5 md:pb-6 border-b border-gray-100">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Phone</p>
-                    <p className="text-base md:text-lg font-semibold text-text break-all">{profile.phone_number || '—'}</p>
+                  <div className="group space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                      Phone Contact
+                    </p>
+                    <div className="p-5 rounded-2xl bg-gray-50/50 border border-gray-50 group-hover:bg-white group-hover:border-primary/20 group-hover:shadow-md transition-all duration-300">
+                      <p className="text-lg font-bold text-text break-all">{profile.phone_number || '—'}</p>
+                    </div>
                   </div>
-                  <div className="pb-5 md:pb-6 border-b border-gray-100">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Team</p>
-                    <Badge variant={profile.team === 'logistics' ? 'default' : 'success'} className="capitalize rounded-lg text-xs md:text-sm">
-                      {profile.team || 'Unassigned'}
-                    </Badge>
+                  <div className="group space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                      Assigned Team
+                    </p>
+                    <div className="p-5 rounded-2xl bg-gray-50/50 border border-gray-50 group-hover:bg-white group-hover:border-primary/20 group-hover:shadow-md transition-all duration-300 flex items-center justify-between">
+                      <p className="text-lg font-bold text-text capitalize">{profile.team || 'Unassigned'}</p>
+                      <Badge variant={profile.team === 'logistics' ? 'default' : 'success'} className="rounded-xl px-4 py-1.5 border-0 shadow-sm">
+                        Active
+                      </Badge>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Joined</p>
-                    <p className="text-base md:text-lg font-semibold text-text">{new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                  <div className="group space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                      Platform Activity
+                    </p>
+                    <div className="p-5 rounded-2xl bg-gray-50/50 border border-gray-50 group-hover:bg-white group-hover:border-primary/20 group-hover:shadow-md transition-all duration-300 flex items-center justify-between">
+                      <p className="text-lg font-bold text-text">{activities.length} Recorded Logs</p>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                        <CalendarIcon size={16} />
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
             </div>
           </Card>
-
-         
         </div>
 
-        {/* Right Column: Statistics */}
-        <div className="lg:col-span-1 space-y-4 md:space-y-6">
-          {/* Score Card */}
-          <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-primary to-blue-600 text-white">
-            <div className="space-y-3 md:space-y-4">
+        {/* Stats Column - Right 1/3 - Order 2 */}
+        <div className="space-y-8 order-2 lg:order-2">
+          {/* Ranking Card */}
+          <Card className="relative p-10 bg-sidebar text-white rounded-[2.5rem] shadow-2xl shadow-sidebar/20 overflow-hidden group border-0">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors duration-500"></div>
+            <div className="relative space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm md:text-base font-semibold opacity-90 uppercase tracking-wider">Current Score</h3>
-                <Award size={20} className="md:w-6 md:h-6 opacity-80" />
+                <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-inner">
+                  <Award size={28} className="text-secondary" />
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-40">Global Ranking</p>
+                  <p className="text-xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+                    Top Contributor
+                  </p>
+                </div>
               </div>
-              <p className="text-4xl md:text-5xl lg:text-6xl font-bold">{currentScore}</p>
-              <p className="text-xs md:text-sm opacity-80">Based on your contact activities</p>
-            </div>
-          </Card>
-
-          {/* Activity Count Card */}
-            <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-secondary via-emerald-500 to-teal-600 text-white">
-              <div className="space-y-3 md:space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs md:text-sm font-bold opacity-90 uppercase tracking-wider">Total Activities</h3>
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                    <CalendarIcon size={18} className="md:w-6 md:h-6 opacity-90" />
+              <div>
+                <p className="text-6xl md:text-7xl font-black tracking-tighter mb-2 drop-shadow-sm">{currentScore}</p>
+                <p className="text-sm font-bold opacity-60">Dynamic points earned through platform activity</p>
+              </div>
+              <div className="pt-6 border-t border-white/10">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Previous Level</p>
+                    <p className="font-bold opacity-80">Rookie</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Next Reward</p>
+                    <p className="font-bold text-secondary">Elite Badge</p>
                   </div>
                 </div>
-                <p className="text-4xl md:text-5xl lg:text-6xl font-bold">{activities.length}</p>
-                <p className="text-xs md:text-sm opacity-85">Contact records created</p>
+                <div className="mt-4 h-2 bg-white/5 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-full bg-gradient-to-r from-primary to-secondary w-2/3 rounded-full shadow-lg shadow-primary/20"></div>
+                </div>
               </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Activity Section - Order 3 */}
+        <div className="lg:col-span-2 space-y-6 order-3 lg:order-3">
+          <div className="flex items-center justify-between px-4">
+            <h3 className="text-xl font-black text-text tracking-tight">Recent Activity Feed</h3>
+            <Badge variant="outline" className="rounded-xl px-3 py-1 font-bold lowercase border-gray-200">
+              {activities.length} total events
+            </Badge>
+          </div>
+
+          {activities.length === 0 ? (
+            <Card className="p-16 border-dashed border-2 border-gray-100 text-center bg-gray-50/30 rounded-[2.5rem]">
+              <div className="w-20 h-20 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mx-auto mb-6 text-gray-200">
+                <CalendarIcon size={40} />
+              </div>
+              <h4 className="text-xl font-bold text-text mb-2">No activity recorded</h4>
+              <p className="text-gray-400 max-w-xs mx-auto">Your contributions and interactions will appear here once they start rolling in.</p>
             </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {activities.slice(0, 5).map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-5 p-4 bg-white hover:bg-gray-50/50 rounded-3xl border border-gray-100 transition-all duration-300 group hover:shadow-lg hover:shadow-gray-100/50 hover:-translate-y-0.5"
+                >
+                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                    <Award size={24} className="opacity-80" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-black text-text capitalize tracking-tight">
+                      {activity.contact_method} <span className="text-gray-300 font-normal mx-2"> via </span> {activity.source}
+                    </p>
+                    <p className="text-sm font-bold text-gray-400 mt-1 flex items-center gap-2">
+                      <Clock size={14} className="opacity-60" />
+                      {new Date(activity.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  <div className="hidden sm:flex px-5 py-2.5 rounded-2xl bg-emerald-50 text-secondary font-black text-sm border border-emerald-100/50">
+                    + Points
+                  </div>
+                </div>
+              ))}
+              {activities.length > 5 && (
+                <button className="w-full py-4 text-sm font-black text-gray-400 hover:text-primary transition-colors text-center uppercase tracking-widest">
+                  View Complete History
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Recent Activities Card - Full Width */}
-      <Card className="p-6 md:p-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-        <h3 className="text-base md:text-lg font-bold text-text mb-6 md:mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center flex-shrink-0">
-            <CalendarIcon size={18} className="md:w-5 md:h-5 text-secondary" />
-          </div>
-          <span className="hidden sm:inline">Recent Activities</span>
-          <span className="sm:hidden">Activities</span>
-        </h3>
-        
-        {activities.length === 0 ? (
-          <div className="text-center py-12 md:py-16 text-gray-400">
-            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
-              <Award size={32} className="md:w-10 md:h-10 opacity-40" />
-            </div>
-            <p className="font-semibold text-gray-600 text-sm md:text-base">No activities recorded yet</p>
-            <p className="text-xs md:text-sm mt-2 text-gray-500">Start making contacts to build your ranking</p>
-          </div>
-        ) : (
-          <div className="space-y-3 md:space-y-4 max-h-[400px] md:max-h-[500px] overflow-y-auto">
-            {activities.map((activity, index) => (
-              <div key={activity.id} className="flex items-start gap-3 md:gap-4 p-4 md:p-5 bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl md:rounded-2xl border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all duration-200 group">
-                <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary font-bold text-xs md:text-sm group-hover:shadow-md transition-all duration-200">
-                  {index + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm font-bold text-text line-clamp-1 md:line-clamp-none">
-                    <span className="capitalize text-primary">{activity.contact_method}</span>
-                    {' '}
-                    <span className="text-gray-400 hidden sm:inline">•</span>
-                    {' '}
-                    <span className="capitalize text-gray-600">{activity.source}</span>
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 md:mt-1.5 font-medium line-clamp-1 md:line-clamp-none">
-                    {new Date(activity.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    {' '}
-                    <span className="text-gray-400 hidden sm:inline">•</span>
-                    {' '}
-                    {new Date(activity.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 whitespace-nowrap rounded-lg font-bold text-xs md:text-sm flex-shrink-0">
-                  + pts
-                </Badge>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
     </div>
   );
 };

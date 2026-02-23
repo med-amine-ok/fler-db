@@ -97,7 +97,7 @@ export interface Database {
                 Row: {
                     id: number
                     name: string
-                    type: 'hotel' | 'salle' | 'food' | 'goodies' | null
+                    type: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status: string | null
                     contact_method: 'call' | 'email' | 'linkedin' | 'outing' | null
                     assigned_user_id: string | null
@@ -108,7 +108,7 @@ export interface Database {
                 Insert: {
                     id?: number
                     name: string
-                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | null
+                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status?: string | null
                     contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
                     assigned_user_id?: string | null
@@ -119,7 +119,7 @@ export interface Database {
                 Update: {
                     id?: number
                     name?: string
-                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | null
+                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status?: string | null
                     contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
                     assigned_user_id?: string | null

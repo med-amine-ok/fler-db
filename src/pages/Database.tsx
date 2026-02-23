@@ -8,7 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { Sheet } from '../components/ui/Sheet';
 import { supabase } from '../lib/supabase';
 
-type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods';
+type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods' | 'Passages';
 
 export const Database = () => {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export const Database = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
-  const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods'];
+  const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods', 'Passages'];
 
   useEffect(() => {
     fetchData();
@@ -69,6 +69,9 @@ export const Database = () => {
         case 'Goodies':
           query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'goodies').order('created_at', { ascending: false });
           break;
+        case 'Passages':
+          query = supabase.from('logistics').select('*, profiles(full_name)').eq('type', 'passage').order('created_at', { ascending: false });
+          break;
 
         default:
           setLoading(false);
@@ -102,6 +105,7 @@ export const Database = () => {
         notes: editingItem.notes,
         contact: editingItem.contact,
         contact_method: editingItem.contact_method,
+        assigned_user_id: editingItem.assigned_user_id,
       };
 
       if (activeTab === 'Companies') {
@@ -155,7 +159,7 @@ export const Database = () => {
   const handleAdd = () => {
     // Redirect to specific add forms based on tab
     if (activeTab === 'Companies') navigate('/teams/sponsoring/global/add');
-    else if (['Hotels', 'Foods', 'Goodies'].includes(activeTab)) navigate('/teams/logistics/add');
+    else if (['Hotels', 'Foods', 'Goodies', 'Passages'].includes(activeTab)) navigate('/teams/logistics/add');
     else navigate(`/database/add?type=${activeTab}`);
   };
 
@@ -583,6 +587,7 @@ export const Database = () => {
                   <option value="hotel">Hotel</option>
                   <option value="food">Food</option>
                   <option value="goodies">Goodies</option>
+                  <option value="passage">Passage</option>
                   <option value="salle">Salle</option>
                 </select>
               </div>
@@ -635,6 +640,20 @@ export const Database = () => {
                 onChange={e => setEditingItem({ ...editingItem, contact: e.target.value })}
                 placeholder="Phone, email, or name"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Operator</label>
+              <select
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white"
+                value={editingItem.assigned_user_id || ''}
+                onChange={e => setEditingItem({ ...editingItem, assigned_user_id: e.target.value })}
+              >
+                <option value="">Unassigned</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.full_name}</option>
+                ))}
+              </select>
             </div>
 
             <div>

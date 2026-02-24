@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, Database as DatabaseIcon, Loader2, Edit2 } from 'lucide-react';
+import { Search, Filter, Plus, Database as DatabaseIcon, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -25,6 +25,8 @@ export const Database = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteItem, setConfirmDeleteItem] = useState<any>(null);
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods', 'Passages'];
 
@@ -90,6 +92,22 @@ export const Database = () => {
   const handleEdit = (item: any) => {
     setEditingItem({ ...item });
     setIsEditSheetOpen(true);
+  };
+
+  const handleDelete = async (item: any) => {
+    setDeletingId(item.id);
+    try {
+      const table = activeTab === 'Companies' ? 'companies' : 'logistics';
+      const { error } = await (supabase as any).from(table).delete().eq('id', item.id);
+      if (error) throw error;
+      setConfirmDeleteItem(null);
+      fetchData();
+    } catch (error: any) {
+      console.error('Error deleting record:', error);
+      alert('Failed to delete record: ' + error.message);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -173,9 +191,9 @@ export const Database = () => {
           <th className={clsx(commonClasses, "w-[15%]")}>Event</th>
           <th className={clsx(commonClasses, "w-[12%]")}>Status</th>
           <th className={clsx(commonClasses, "w-[12%]")}>Method</th>
-          <th className={clsx(commonClasses, "w-[21%]")}>Notes</th>
+          <th className={clsx(commonClasses, "w-[16%]")}>Notes</th>
           <th className={clsx(commonClasses, "w-[15%]")}>Assigned</th>
-          <th className={clsx(commonClasses, "w-[5%] text-right")}></th>
+          <th className={clsx(commonClasses, "w-[10%] text-right")}></th>
         </tr>
       );
     }
@@ -183,11 +201,11 @@ export const Database = () => {
     // Logistics (Hotels, Foods, Goodies)
     return (
       <tr className="border-b border-gray-100 bg-gray-50/50">
-        <th className={clsx(commonClasses, "w-[40%]")}>Name</th>
+        <th className={clsx(commonClasses, "w-[35%]")}>Name</th>
         <th className={clsx(commonClasses, "w-[15%]")}>Status</th>
         <th className={clsx(commonClasses, "w-[15%]")}>Type</th>
         <th className={clsx(commonClasses, "w-[25%]")}>Assigned</th>
-        <th className={clsx(commonClasses, "w-[5%] text-right")}></th>
+        <th className={clsx(commonClasses, "w-[10%] text-right")}></th>
       </tr>
     );
   };
@@ -257,14 +275,22 @@ export const Database = () => {
             </div>
           </td>
           <td className={clsx(cellClasses, "text-right")}>
-            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {currentUser && item.assigned_user_id === currentUser.id ? (
-                <button
-                  className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
-                  onClick={() => handleEdit(item)}
-                >
-                  <Edit2 size={14} />
-                </button>
+                <>
+                  <button
+                    className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                    onClick={() => handleEdit(item)}
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                  <button
+                    className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
+                    onClick={() => setConfirmDeleteItem(item)}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </>
               ) : (
                 <div className="w-7 h-7" />
               )}
@@ -299,14 +325,22 @@ export const Database = () => {
           </div>
         </td>
         <td className={clsx(cellClasses, "text-right")}>
-          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {currentUser && item.assigned_user_id === currentUser.id ? (
-              <button
-                className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
-                onClick={() => handleEdit(item)}
-              >
-                <Edit2 size={14} />
-              </button>
+              <>
+                <button
+                  className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                  onClick={() => handleEdit(item)}
+                >
+                  <Edit2 size={14} />
+                </button>
+                <button
+                  className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
+                  onClick={() => setConfirmDeleteItem(item)}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </>
             ) : (
               <div className="w-7 h-7" />
             )}
@@ -382,14 +416,24 @@ export const Database = () => {
         </div>
 
         {currentUser && item.assigned_user_id === currentUser.id && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full mt-2 h-9 text-xs gap-2 border-primary/20 text-primary"
-            onClick={() => handleEdit(item)}
-          >
-            <Edit2 size={14} /> Edit Contact
-          </Button>
+          <div className="flex gap-2 mt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 h-9 text-xs gap-2 border-primary/20 text-primary"
+              onClick={() => handleEdit(item)}
+            >
+              <Edit2 size={14} /> Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 h-9 text-xs gap-2 border-red-200 text-red-400 hover:bg-red-50"
+              onClick={() => setConfirmDeleteItem(item)}
+            >
+              <Trash2 size={14} /> Delete
+            </Button>
+          </div>
         )}
       </Card>
     ));
@@ -542,6 +586,35 @@ export const Database = () => {
           </div>
         </div>
       </Sheet>
+
+      {/* Confirm Delete Dialog */}
+      {confirmDeleteItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm space-y-4">
+            <h2 className="text-lg font-bold text-gray-900">Delete Record</h2>
+            <p className="text-sm text-gray-500">
+              Are you sure you want to delete <span className="font-semibold text-gray-800">{confirmDeleteItem.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setConfirmDeleteItem(null)}
+                disabled={!!deletingId}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white border-0"
+                onClick={() => handleDelete(confirmDeleteItem)}
+                disabled={!!deletingId}
+              >
+                {deletingId === confirmDeleteItem.id ? <Loader2 className="animate-spin" size={16} /> : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Sheet */}
       <Sheet

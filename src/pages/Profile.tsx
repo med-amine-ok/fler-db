@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, Shield, User, Award, Calendar as CalendarIcon, Edit2, Save, X, Phone, UserCheck, Clock } from 'lucide-react';
+import { Mail, Shield, User, Award, Calendar as CalendarIcon, Edit2, Save, X, Phone, UserCheck, Clock, Leaf, Zap, Flame, PhoneCall, Handshake, Briefcase, Star, Trophy, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -9,6 +9,18 @@ import type { Database } from '../lib/database.types';
 
 type ProfileRecord = Database['public']['Tables']['profiles']['Row'];
 type ActivityRecord = Database['public']['Tables']['activities']['Row'];
+
+const BADGES = [
+  { min: 0,    label: 'Rookie',               Icon: Leaf,      earned: 'bg-gradient-to-br from-gray-400 to-gray-500',     ring: 'ring-gray-300'   },
+  { min: 100,  label: 'Starter',              Icon: Zap,       earned: 'bg-gradient-to-br from-blue-400 to-blue-600',     ring: 'ring-blue-300'   },
+  { min: 200,  label: 'Active',               Icon: Flame,     earned: 'bg-gradient-to-br from-orange-400 to-orange-500', ring: 'ring-orange-300' },
+  { min: 300,  label: 'Hustler',              Icon: PhoneCall, earned: 'bg-gradient-to-br from-purple-400 to-purple-600', ring: 'ring-purple-300' },
+  { min: 400,  label: 'Closer',               Icon: Handshake, earned: 'bg-gradient-to-br from-red-400 to-rose-500',      ring: 'ring-red-300'    },
+  { min: 600,  label: 'Pro',                  Icon: Briefcase, earned: 'bg-gradient-to-br from-cyan-400 to-cyan-600',    ring: 'ring-cyan-300'   },
+  { min: 700,  label: 'Elite',                Icon: Star,      earned: 'bg-gradient-to-br from-yellow-400 to-amber-500', ring: 'ring-yellow-300' },
+  { min: 850,  label: 'Legend',               Icon: Trophy,    earned: 'bg-gradient-to-br from-amber-500 to-orange-600', ring: 'ring-amber-300'  },
+  { min: 1000, label: 'm3labalkch wech kayn', Icon: Crown,     earned: 'bg-gradient-to-br from-violet-500 to-pink-500',  ring: 'ring-violet-300' },
+];
 
 export const Profile = () => {
   const [loading, setLoading] = useState(true);
@@ -132,6 +144,15 @@ export const Profile = () => {
   }
 
   const currentScore = calculateScore();
+
+  const currentBadgeIndex = BADGES.reduce((acc, badge, i) => currentScore >= badge.min ? i : acc, 0);
+  const currentBadge = BADGES[currentBadgeIndex];
+  const nextBadge = BADGES[currentBadgeIndex + 1] ?? null;
+  const prevMin = currentBadge.min;
+  const nextMin = nextBadge?.min ?? prevMin;
+  const progressPct = nextBadge
+    ? Math.min(100, Math.round(((currentScore - prevMin) / (nextMin - prevMin)) * 100))
+    : 100;
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
@@ -334,9 +355,10 @@ export const Profile = () => {
                   <Award size={28} className="text-secondary" />
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-40">Global Ranking</p>
-                  <p className="text-xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
-                    Top Contributor
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-40">Current Badge</p>
+                  <p className="text-xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent flex items-center justify-end gap-1.5">
+                    <currentBadge.Icon size={18} />
+                    {currentBadge.label}
                   </p>
                 </div>
               </div>
@@ -347,24 +369,114 @@ export const Profile = () => {
               <div className="pt-6 border-t border-white/10">
                 <div className="flex justify-between items-end">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Previous Level</p>
-                    <p className="font-bold opacity-80">Rookie</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Current Badge</p>
+                    <p className="font-bold opacity-80 flex items-center gap-1.5">
+                      <currentBadge.Icon size={14} />
+                      {currentBadge.label}
+                    </p>
                   </div>
                   <div className="text-right space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Next Reward</p>
-                    <p className="font-bold text-secondary">Elite Badge</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Next Badge</p>
+                    {nextBadge ? (
+                      <p className="font-bold text-secondary flex items-center justify-end gap-1.5">
+                        <nextBadge.Icon size={14} />
+                        {nextBadge.label}
+                      </p>
+                    ) : (
+                      <p className="font-bold text-secondary flex items-center justify-end gap-1.5"><Crown size={14} /> Max Tier</p>
+                    )}
                   </div>
                 </div>
                 <div className="mt-4 h-2 bg-white/5 rounded-full overflow-hidden shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-primary to-secondary w-2/3 rounded-full shadow-lg shadow-primary/20"></div>
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg shadow-primary/20 transition-all duration-700"
+                    style={{ width: `${progressPct}%` }}
+                  />
                 </div>
+                {nextBadge && (
+                  <p className="text-[9px] font-bold opacity-40 mt-1.5 text-right">
+                    {nextBadge.min - currentScore} pts to {nextBadge.label}
+                  </p>
+                )}
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Activity Section - Order 3 */}
-        
+        {/* Badge Section - Order 3 */}
+        <Card className="p-8 border border-gray-100/60 shadow-xl shadow-gray-200/20 rounded-[2rem] bg-white overflow-hidden order-3 lg:col-span-3">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-text tracking-tight">Achievements</h3>
+                
+              </div>
+              <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl ${currentBadge.earned} text-white shadow-lg`}>
+                <currentBadge.Icon size={22} />
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-70">Current Badge</p>
+                  <p className="text-base font-black leading-tight">{currentBadge.label}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Badge Grid */}
+            <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-3">
+              {BADGES.map((badge, i) => {
+                const isEarned = currentScore >= badge.min;
+                const isCurrent = i === currentBadgeIndex;
+                return (
+                  <div
+                    key={i}
+                    className={`relative flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300 ${
+                      isEarned
+                        ? `${badge.earned} text-white shadow-md ring-2 ${badge.ring} ring-offset-2`
+                        : 'bg-gray-50 text-gray-300 border border-gray-100'
+                    }`}
+                  >
+                    {isCurrent && (
+                      <span className="absolute -top-2 -right-2 w-4 h-4 bg-secondary rounded-full border-2 border-white shadow animate-pulse" />
+                    )}
+                    <badge.Icon size={22} className={isEarned ? 'opacity-100' : 'opacity-20'} />
+                    <p className={`text-[8px] font-black uppercase tracking-wide text-center leading-tight ${
+                      isEarned ? 'text-white/80' : 'text-gray-300'
+                    }`}>{badge.label}</p>
+                    <p className={`text-[7px] font-bold ${isEarned ? 'text-white/50' : 'text-gray-200'}`}>{badge.min}pts</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Progress to next badge */}
+            {nextBadge ? (
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between items-center text-xs font-bold text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <nextBadge.Icon size={13} />
+                    Next: <span className="text-text">{nextBadge.label}</span>
+                  </span>
+                  <span className="tabular-nums">
+                    <span className="text-primary font-black">{currentScore - prevMin}</span>
+                    <span className="text-gray-300"> / {nextMin - prevMin} pts</span>
+                  </span>
+                </div>
+                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-700"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 font-semibold text-right">{nextMin - currentScore} points to go</p>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-3 py-3 rounded-2xl bg-gradient-to-r from-violet-50 to-pink-50 border border-violet-100">
+                <Crown size={20} className="text-violet-500" />
+                <p className="text-sm font-black text-violet-600 uppercase tracking-widest">Maximum tier reached — m3labalkch wech kayn!</p>
+                <Crown size={20} className="text-violet-500" />
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );

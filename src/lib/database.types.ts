@@ -63,7 +63,7 @@ export interface Database {
                     id: number
                     name: string
                     status: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id: string | null
                     notes: string | null
                     contact: string | null
@@ -74,7 +74,7 @@ export interface Database {
                     id?: number
                     name: string
                     status?: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
@@ -85,7 +85,7 @@ export interface Database {
                     id?: number
                     name?: string
                     status?: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
@@ -99,7 +99,7 @@ export interface Database {
                     name: string
                     type: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status: string | null
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id: string | null
                     notes: string | null
                     contact: string | null
@@ -110,7 +110,7 @@ export interface Database {
                     name: string
                     type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status?: string | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
@@ -121,7 +121,7 @@ export interface Database {
                     name?: string
                     type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
                     status?: string | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     assigned_user_id?: string | null
                     notes?: string | null
                     contact?: string | null
@@ -134,7 +134,7 @@ export interface Database {
                     user_id: string | null
                     source: 'company' | 'logistics' | null
                     source_id: number
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     created_at: string
                 }
                 Insert: {
@@ -142,7 +142,7 @@ export interface Database {
                     user_id?: string | null
                     source?: 'company' | 'logistics' | null
                     source_id: number
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     created_at?: string
                 }
                 Update: {
@@ -150,7 +150,7 @@ export interface Database {
                     user_id?: string | null
                     source?: 'company' | 'logistics' | null
                     source_id?: number
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | null
+                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
                     created_at?: string
                 }
             }

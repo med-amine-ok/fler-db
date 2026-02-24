@@ -6,6 +6,7 @@ export const CONTACT_POINTS = {
   email: 3,
   linkedin: 4,
   outing: 10,
+  social_media: 4,
 } as const;
 
 export type ContactMethod = keyof typeof CONTACT_POINTS;

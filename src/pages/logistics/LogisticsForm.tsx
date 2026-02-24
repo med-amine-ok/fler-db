@@ -123,6 +123,7 @@ export const LogisticsForm = () => {
               <option value="linkedin">LinkedIn</option>
               <option value="call">Call</option>
               <option value="outing">Outing</option>
+              <option value="social_media">Social Media</option>
             </select>
           </div>
 

@@ -628,6 +628,7 @@ export const Database = () => {
                 <option value="email">Email</option>
                 <option value="linkedin">LinkedIn</option>
                 <option value="outing">Outing</option>
+                <option value="social_media">Social Media</option>
               </select>
             </div>
 

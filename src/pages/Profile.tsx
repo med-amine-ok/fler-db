@@ -364,54 +364,7 @@ export const Profile = () => {
         </div>
 
         {/* Activity Section - Order 3 */}
-        <div className="lg:col-span-2 space-y-6 order-3 lg:order-3">
-          <div className="flex items-center justify-between px-4">
-            <h3 className="text-xl font-black text-text tracking-tight">Recent Activity Feed</h3>
-            <Badge variant="outline" className="rounded-xl px-3 py-1 font-bold lowercase border-gray-200">
-              {activities.length} total events
-            </Badge>
-          </div>
-
-          {activities.length === 0 ? (
-            <Card className="p-16 border-dashed border-2 border-gray-100 text-center bg-gray-50/30 rounded-[2.5rem]">
-              <div className="w-20 h-20 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mx-auto mb-6 text-gray-200">
-                <CalendarIcon size={40} />
-              </div>
-              <h4 className="text-xl font-bold text-text mb-2">No activity recorded</h4>
-              <p className="text-gray-400 max-w-xs mx-auto">Your contributions and interactions will appear here once they start rolling in.</p>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {activities.slice(0, 5).map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center gap-5 p-4 bg-white hover:bg-gray-50/50 rounded-3xl border border-gray-100 transition-all duration-300 group hover:shadow-lg hover:shadow-gray-100/50 hover:-translate-y-0.5"
-                >
-                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
-                    <Award size={24} className="opacity-80" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-black text-text capitalize tracking-tight">
-                      {activity.contact_method} <span className="text-gray-300 font-normal mx-2"> via </span> {activity.source}
-                    </p>
-                    <p className="text-sm font-bold text-gray-400 mt-1 flex items-center gap-2">
-                      <Clock size={14} className="opacity-60" />
-                      {new Date(activity.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                  <div className="hidden sm:flex px-5 py-2.5 rounded-2xl bg-emerald-50 text-secondary font-black text-sm border border-emerald-100/50">
-                    + Points
-                  </div>
-                </div>
-              ))}
-              {activities.length > 5 && (
-                <button className="w-full py-4 text-sm font-black text-gray-400 hover:text-primary transition-colors text-center uppercase tracking-widest">
-                  View Complete History
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        
       </div>
     </div>
   );

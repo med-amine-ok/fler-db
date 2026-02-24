@@ -33,7 +33,7 @@ export type Company = {
     status: 'contacted' | 'pending' | 'signed' | 'rejected' ;
     eventId?: string; // Optional for mock data compatibility
     assignedTo?: string; // profiles.full_name
-    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing';
+    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media';
     notes?: string;
 };
 
@@ -43,7 +43,7 @@ export type Resource = {
     type: 'hotel' | 'salle' | 'food' | 'goodies' | 'goodie'; // 'goodie' in UI, 'goodies' in DB
     status: string; // DB is text
     eventId?: string; // Opt for mock
-    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing';
+    contactMethod?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media';
     assignedTo?: string;
     notes?: string;
 };

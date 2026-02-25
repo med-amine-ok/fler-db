@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Sheet } from '../components/ui/Sheet';
 import { supabase } from '../lib/supabase';
+import { SUPER_ADMIN_EMAIL } from '../lib/constants';
 
 type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods' | 'Passages';
 
@@ -19,6 +20,7 @@ export const Database = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'status' | 'event'>('newest');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -40,6 +42,7 @@ export const Database = () => {
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUser(user);
+    setIsSuperAdmin(user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
   };
 
   const fetchEvents = async () => {
@@ -276,7 +279,7 @@ export const Database = () => {
           </td>
           <td className={clsx(cellClasses, "text-right")}>
             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {currentUser && item.assigned_user_id === currentUser.id ? (
+              {(isSuperAdmin || (currentUser && item.assigned_user_id === currentUser.id)) ? (
                 <>
                   <button
                     className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
@@ -326,7 +329,7 @@ export const Database = () => {
         </td>
         <td className={clsx(cellClasses, "text-right")}>
           <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {currentUser && item.assigned_user_id === currentUser.id ? (
+            {(isSuperAdmin || (currentUser && item.assigned_user_id === currentUser.id)) ? (
               <>
                 <button
                   className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
@@ -415,7 +418,7 @@ export const Database = () => {
           </div>
         </div>
 
-        {currentUser && item.assigned_user_id === currentUser.id && (
+        {(isSuperAdmin || (currentUser && item.assigned_user_id === currentUser.id)) && (
           <div className="flex gap-2 mt-2">
             <Button
               size="sm"

@@ -74,6 +74,18 @@ export const SuperAdmin = () => {
 
     useEffect(() => {
         fetchData();
+
+        // Listen to both tables so any change (delete from activities,
+        // manual ranking edit in profiles) triggers a live refresh.
+        const channel = supabase
+            .channel('ranking-live-updates')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData(true))
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, () => fetchData(true))
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const fetchData = async (isRefresh = false) => {

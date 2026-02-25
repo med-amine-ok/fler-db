@@ -29,6 +29,7 @@ export const Database = () => {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<any>(null);
+  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods', 'Passages'];
 
@@ -156,7 +157,8 @@ export const Database = () => {
   const filteredData = data.filter(item => {
     const matchesSearch = JSON.stringify(item).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
-    return matchesSearch && matchesUser;
+    const matchesContactMethod = !selectedContactMethod || item.contact_method === selectedContactMethod;
+    return matchesSearch && matchesUser && matchesContactMethod;
   }).sort((a, b) => {
     switch (sortBy) {
       case 'newest':
@@ -418,7 +420,7 @@ export const Database = () => {
           </div>
         </div>
 
-        {(isSuperAdmin || (currentUser && item.assigned_user_id === currentUser.id)) && (
+        {(isSuperAdmin ? true : (currentUser && item.assigned_user_id === currentUser.id)) && (
           <div className="flex gap-2 mt-2">
             <Button
               size="sm"
@@ -583,6 +585,25 @@ export const Database = () => {
               ))}
             </select>
           </div>
+
+          {activeTab === 'Companies' && (
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by Contact Method</label>
+              <div className="flex gap-2 flex-wrap">
+                {['call', 'email', 'linkedin', 'outing', 'social_media'].map(method => (
+                  <Button
+                    key={method}
+                    variant={selectedContactMethod === method ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedContactMethod(selectedContactMethod === method ? null : method)}
+                    className="rounded-full capitalize"
+                  >
+                    {method === 'social_media' ? 'Social Media' : method.charAt(0).toUpperCase() + method.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="pt-4 mt-auto">
             <Button className="w-full" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>

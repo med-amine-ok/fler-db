@@ -2,6 +2,7 @@ import { Sidebar } from '../components/Sidebar';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Bell, LogOut, Quote, Sparkles, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
 import { Modal } from '../components/ui/Modal';
 
@@ -13,6 +14,7 @@ export const DashboardLayout = () => {
   const isHome = pageTitle.toLowerCase() === 'home' || pageTitle.toLowerCase() === 'overview';
   const [userName, setUserName] = useState('User');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     fetchUserProfile();
@@ -82,10 +84,16 @@ export const DashboardLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-background font-sans">
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main className="flex-1 md:ml-72 flex flex-col min-h-screen relative">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
+      <main className={clsx(
+        "flex-1 flex flex-col min-h-screen relative transition-all duration-300",
+        sidebarCollapsed ? "md:ml-16" : "md:ml-72"
+      )}>
         {/* Background Watermark */}
-        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center md:ml-72">
+        <div className={clsx(
+          "fixed inset-0 z-50 pointer-events-none flex items-center justify-center transition-all duration-300",
+          sidebarCollapsed ? "md:ml-16" : "md:ml-72"
+        )}>
           <img src="/vic.png" className="block md:hidden w-[500px] opacity-[0.2]" alt="" />
           <img src="/vic_long.png" className="hidden md:block w-[1000px] opacity-[0.2]" alt="" />
         </div>
@@ -93,14 +101,24 @@ export const DashboardLayout = () => {
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
           <div className="flex items-center gap-4">
-            {/* Mobile Menu Toggle - Opens Drawer */}
+            {/* Animated Hamburger / X toggle */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px] p-1 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors relative"
+              aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <span className={clsx(
+                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
+                sidebarOpen ? "w-5 rotate-45 translate-y-[7px]" : "w-6"
+              )} />
+              <span className={clsx(
+                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300",
+                sidebarOpen ? "w-0 opacity-0" : "w-5 opacity-100"
+              )} />
+              <span className={clsx(
+                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
+                sidebarOpen ? "w-5 -rotate-45 -translate-y-[7px]" : "w-6"
+              )} />
             </button>
             <h2 className="text-lg md:text-xl font-bold text-text capitalize tracking-tight line-clamp-2">
               {isHome ? (

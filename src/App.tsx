@@ -19,7 +19,8 @@ import { SponsoringDashboard } from './pages/sponsoring/SponsoringDashboard';
 import { SponsoringForm } from './pages/sponsoring/SponsoringForm';
 import { DatabaseForm } from './pages/DatabaseForm';
 import { SuperAdmin } from './pages/SuperAdmin';
-import { ALLOWED_EMAILS, SUPER_ADMIN_EMAIL } from './lib/constants';
+import { Secretary } from './pages/Secretary';
+import { ALLOWED_EMAILS, SUPER_ADMIN_EMAIL, SECRETARY_EMAILS } from './lib/constants';
 
 const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; error?: string }> => {
   try {
@@ -215,6 +216,11 @@ function App() {
           <Route path="/database" element={<Database />} />
           <Route path="/database/add" element={<DatabaseForm />} />
           <Route path="/profile" element={<Profile />} />
+
+          {/* Secretary Route */}
+          {SECRETARY_EMAILS.includes(session?.user?.email?.toLowerCase() || '') && (
+            <Route path="/secretary" element={<Secretary />} />
+          )}
 
           {/* Super Admin Route */}
           {session?.user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL && (

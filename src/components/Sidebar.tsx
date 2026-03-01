@@ -1,18 +1,91 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Calendar, Database, User, ChevronRight, X, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Database, User, ChevronRight, ShieldCheck, ClipboardList, ChevronLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
-import { useEffect, useState } from 'react';
-import { SUPER_ADMIN_EMAIL } from '../lib/constants';
+import { useEffect, useRef, useState } from 'react';
+import { SUPER_ADMIN_EMAIL, SECRETARY_EMAILS } from '../lib/constants';
 
-export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) => {
+interface SidebarProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+}
+
+/* ── Tooltip wrapper — uses fixed positioning to escape scrollable nav ── */
+const NavTooltip = ({ label, children }: { label: string; children: React.ReactNode }) => {
+  const [visible, setVisible] = useState(false);
+  const [y, setY] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const show = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setY(rect.top + rect.height / 2);
+    }
+    setVisible(true);
+  };
+
+  return (
+    <div ref={ref} className="relative flex justify-center w-full" onMouseEnter={show} onMouseLeave={() => setVisible(false)}>
+      {children}
+      {visible && (
+        <div
+          style={{ position: 'fixed', left: '4.5rem', top: y, transform: 'translateY(-50%)' }}
+          className="z-[9999] px-3 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg whitespace-nowrap shadow-xl pointer-events-none animate-fade-in"
+        >
+          {label}
+          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Single nav link that adapts to collapsed / full mode ── */
+const SideNavLink = ({
+  icon: Icon, label, path, collapsed, onClose,
+}: {
+  icon: React.ElementType; label: string; path: string; collapsed: boolean; onClose: () => void;
+}) => (
+  <NavLink to={path} onClick={onClose} className="block w-full">
+    {({ isActive }) =>
+      collapsed ? (
+        <div className={clsx(
+          'w-10 h-10 flex items-center justify-center rounded-2xl mx-auto transition-all duration-200',
+          isActive
+            ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-110'
+            : 'bg-white/5 text-gray-400 hover:bg-primary/20 hover:text-white hover:scale-105'
+        )}>
+          <Icon size={20} />
+        </div>
+      ) : (
+        <div className={clsx(
+          'flex items-center justify-between w-full px-4 py-3.5 rounded-xl transition-all duration-200 group/link',
+          isActive
+            ? 'bg-primary text-white shadow-lg shadow-primary/25 font-semibold'
+            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+        )}>
+          <div className="flex items-center gap-3.5">
+            <Icon size={22} className={clsx('transition-transform duration-200', isActive ? 'scale-110' : 'group-hover/link:scale-110')} />
+            <span className="text-sm whitespace-nowrap">{label}</span>
+          </div>
+          {isActive && <ChevronRight size={16} className="text-white/50 shrink-0" />}
+        </div>
+      )
+    }
+  </NavLink>
+);
+
+export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSidebarCollapsed }: SidebarProps) => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isSecretary, setIsSecretary] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL) {
-        setIsSuperAdmin(true);
-      }
+      const email = user?.email?.toLowerCase() || '';
+      if (email === SUPER_ADMIN_EMAIL) setIsSuperAdmin(true);
+      if (SECRETARY_EMAILS.includes(email)) setIsSecretary(true);
     });
   }, []);
 
@@ -24,99 +97,119 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
     { icon: User, label: 'My Profile', path: '/profile' },
   ];
 
-  const adminItems = [
-    { icon: ShieldCheck, label: 'Super Admin', path: '/super-admin' },
-  ];
+  const secretaryItems = [{ icon: ClipboardList, label: 'Secretary', path: '/secretary' }];
+  const adminItems = [{ icon: ShieldCheck, label: 'Super Admin', path: '/super-admin' }];
+
+  const closeMobile = () => setSidebarOpen(false);
+
+  /* Renders items with or without tooltip wrapper */
+  const renderItems = (items: typeof navItems) =>
+    items.map((item) =>
+      sidebarCollapsed ? (
+        <NavTooltip key={item.path} label={item.label}>
+          <SideNavLink icon={item.icon} label={item.label} path={item.path} collapsed={true} onClose={closeMobile} />
+        </NavTooltip>
+      ) : (
+        <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} />
+      )
+    );
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+      {/* ── Mobile overlay ── */}
+      <div
+        onClick={closeMobile}
+        className={clsx(
+          'fixed inset-0 z-40 md:hidden transition-all duration-500',
+          sidebarOpen
+            ? 'bg-black/40 backdrop-blur-sm pointer-events-auto'
+            : 'bg-transparent backdrop-blur-none pointer-events-none'
+        )}
+      />
 
-      {/* Sidebar */}
+      {/* ── Sidebar panel ── */}
       <aside className={clsx(
-        "h-screen w-full md:w-72 bg-sidebar text-white flex flex-col fixed left-0 top-0 shadow-2xl z-50 transition-transform duration-300 md:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        'h-screen bg-sidebar text-white flex flex-col fixed left-0 top-0 shadow-2xl z-50',
+        'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+        /* desktop width */
+        sidebarCollapsed ? 'md:w-16' : 'md:w-72',
+        /* mobile: always w-72, slides in/out */
+        'w-72',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       )}>
-        <div className="p-6 md:p-8 pb-4 flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tighter bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
-            FLER DataBase
-          </h1>
+
+        {/* Header */}
+        <div className={clsx(
+          'flex items-center border-b border-white/5 shrink-0 transition-all duration-300',
+          sidebarCollapsed ? 'justify-center px-2 py-5' : 'justify-between px-6 py-5 md:px-8'
+        )}>
+          {!sidebarCollapsed && (
+            <h1 className="text-xl md:text-2xl font-bold tracking-tighter bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap overflow-hidden">
+              FLER DataBase
+            </h1>
+          )}
+
+          {/* Desktop collapse chevron */}
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={clsx(
+              'hidden md:flex items-center justify-center rounded-xl transition-all duration-200',
+              'hover:bg-white/10 text-gray-400 hover:text-white shrink-0',
+              sidebarCollapsed ? 'w-10 h-10' : 'w-8 h-8'
+            )}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <X size={20} />
+            <ChevronLeft
+              size={18}
+              className={clsx('transition-transform duration-300', sidebarCollapsed && 'rotate-180')}
+            />
+          </button>
+
+          {/* Mobile X close */}
+          <button
+            onClick={closeMobile}
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors relative shrink-0"
+            aria-label="Close sidebar"
+          >
+            <span className="absolute block w-5 h-0.5 bg-white rounded-full rotate-45" />
+            <span className="absolute block w-5 h-0.5 bg-white rounded-full -rotate-45" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-          <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+        {/* Navigation */}
+        <nav className={clsx(
+          'flex-1 py-4 overflow-y-auto',
+          sidebarCollapsed ? 'flex flex-col items-center gap-1 px-3' : 'px-4 space-y-1'
+        )}>
+          {/* Main label */}
+          {!sidebarCollapsed ? (
+            <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Menu</p>
+          ) : (
+            <div className="w-6 h-px bg-white/10 mb-2" />
+          )}
 
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                clsx(
-                  "flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
-                  isActive
-                    ? "bg-primary text-white shadow-lg shadow-primary/25 font-semibold"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
-                )
+          {renderItems(navItems)}
+
+          {isSecretary && (
+            <>
+              {sidebarCollapsed
+                ? <div className="w-6 h-px bg-white/10 my-2" />
+                : <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6">Secretary</p>
               }
-            >
-              {({ isActive }: { isActive: boolean }) => (
-                <>
-                  <div className="flex items-center gap-3.5 z-10">
-                    <item.icon size={22} className={clsx("transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
-                    <span className="text-sm md:text-base">{item.label}</span>
-                  </div>
-                  {isActive && <ChevronRight size={16} className="text-white/50" />}
-                </>
-              )}
-            </NavLink>
-          ))}
+              {renderItems(secretaryItems)}
+            </>
+          )}
 
           {isSuperAdmin && (
             <>
-              <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-8">Admin</p>
-              {adminItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    clsx(
-                      "flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
-                      isActive
-                        ? "bg-primary text-white shadow-lg shadow-primary/25 font-semibold"
-                        : "text-gray-400 hover:bg-white/5 hover:text-white"
-                    )
-                  }
-                >
-                  {({ isActive }: { isActive: boolean }) => (
-                    <>
-                      <div className="flex items-center gap-3.5 z-10">
-                        <item.icon size={22} className={clsx("transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
-                        <span className="text-sm md:text-base">{item.label}</span>
-                      </div>
-                      {isActive && <ChevronRight size={16} className="text-white/50" />}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+              {sidebarCollapsed
+                ? <div className="w-6 h-px bg-white/10 my-2" />
+                : <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6">Admin</p>
+              }
+              {renderItems(adminItems)}
             </>
           )}
         </nav>
-
-
       </aside>
     </>
   );

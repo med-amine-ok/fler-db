@@ -102,17 +102,25 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSide
 
   const closeMobile = () => setSidebarOpen(false);
 
-  /* Renders items with or without tooltip wrapper */
+  // Show both icon and label on mobile (w-full), only collapse on desktop
   const renderItems = (items: typeof navItems) =>
-    items.map((item) =>
-      sidebarCollapsed ? (
+    items.map((item) => {
+      // If on mobile (sidebarOpen is true and window.innerWidth < 768), always show label
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      if (isMobile) {
+        return (
+          <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} />
+        );
+      }
+      // Desktop: collapse logic
+      return sidebarCollapsed ? (
         <NavTooltip key={item.path} label={item.label}>
           <SideNavLink icon={item.icon} label={item.label} path={item.path} collapsed={true} onClose={closeMobile} />
         </NavTooltip>
       ) : (
         <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} />
-      )
-    );
+      );
+    });
 
   return (
     <>

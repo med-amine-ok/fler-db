@@ -87,4 +87,5 @@ export const SECRETARY_EMAILS = [
     'maroua_tassanime.amiar@g.enp.edu.dz',
     'mohamed_amine.ould_khaoua@g.enp.edu.dz',
     'sara.zerrouak@g.enp.edu.dz',
+    'medamineouldkhaoua@gmail.com',
 ];

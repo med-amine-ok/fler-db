@@ -22,7 +22,7 @@ export const ALLOWED_EMAILS = [
     'saad.lebdi@g.enp.edu.dz',
     'aya.guerroudj@g.enp.edu.dz',
     'oumaima.gherabi@g.enp.edu.dz',
-    'aymene.khaled@2=enp.edu.dz',
+    'aymene.khaled@g.enp.edu.dz',
     'noudjoud.belkacemi@g.enp.edu.dz',
     'amel.cheouad@g.enp.edu.dz',
     'maria.ayache@g.enp.edu.dz',

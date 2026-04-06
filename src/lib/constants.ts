@@ -87,6 +87,7 @@ export const ALLOWED_EMAILS = [
     'hibat_allah.kaabeche@g.enp.edu.dz',
     'walaa.hassi@g.enp.edu.dz',
     'zakaria.Tikreribine@g.enp.edu.dz',
+    'ferial.handis@g.enp.edu.dz',
 ].map(email => email.toLowerCase().trim());
 
 export const SUPER_ADMIN_EMAIL = 'mohamed_amine.ould_khaoua@g.enp.edu.dz';

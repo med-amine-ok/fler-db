@@ -34,7 +34,7 @@ export const Home = () => {
   const [totalFunds, setTotalFunds] = useState(0);
 
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  
   const [activities, setActivities] = useState<ActivityItem[]>([]);
 
   const EVENT_LOGOS: Record<string, string> = {
@@ -118,7 +118,7 @@ export const Home = () => {
           });
         });
       }
-      setTasks(derivedTasks);
+     
 
       // Fetch dynamic real activities
       const { data: activitiesData } = await supabase
@@ -148,9 +148,7 @@ export const Home = () => {
 
 
 
-  const toggleTask = (taskId: string) => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, done: !t.done } : t));
-  };
+ 
 
   if (loading) {
      return (

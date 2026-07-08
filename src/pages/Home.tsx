@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, ArrowRight, CheckCircle2, TrendingUp, Loader2, Sparkles, Plus, ClipboardList, Briefcase, Activity, Circle } from 'lucide-react';
-import { clsx } from 'clsx';
+import { Calendar, ArrowRight, CheckCircle2, TrendingUp, Loader2, Plus, Briefcase, Activity } from 'lucide-react';
+
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -167,9 +167,7 @@ export const Home = () => {
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
-            <Badge className="bg-white/20 text-white border-0 hover:bg-white/30 backdrop-blur-sm px-3 py-1 font-semibold flex items-center gap-1.5 w-fit">
-              <Sparkles size={12} className="fill-current animate-pulse text-yellow-300" /> FLER Platform Redesign Active
-            </Badge>
+           
             <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">VISION & INNOVATION CLUB</h1>
             <p className="text-white/80 max-w-xl text-sm md:text-base leading-relaxed">
               Supercharge your event pipelines. Track sponsoring, manage logistics resources, and coordinate team actions in one central platform.

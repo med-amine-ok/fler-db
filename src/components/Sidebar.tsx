@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Calendar, Database, User, ChevronRight, ShieldCheck, ClipboardList, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Database, User, ShieldCheck, ClipboardList, ChevronLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
 import { useEffect, useRef, useState } from 'react';
@@ -44,9 +44,9 @@ const NavTooltip = ({ label, children }: { label: string; children: React.ReactN
 
 /* ── Single nav link that adapts to collapsed / full mode ── */
 const SideNavLink = ({
-  icon: Icon, label, path, collapsed, onClose,
+  icon: Icon, label, path, collapsed, onClose, shortcut,
 }: {
-  icon: React.ElementType; label: string; path: string; collapsed: boolean; onClose: () => void;
+  icon: React.ElementType; label: string; path: string; collapsed: boolean; onClose: () => void; shortcut?: string;
 }) => (
   <NavLink to={path} onClick={onClose} className="block w-full">
     {({ isActive }) =>
@@ -66,11 +66,20 @@ const SideNavLink = ({
             ? 'bg-primary text-white shadow-lg shadow-primary/25 font-semibold'
             : 'text-gray-400 hover:bg-white/5 hover:text-white'
         )}>
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3.5 min-w-0">
             <Icon size={22} className={clsx('transition-transform duration-200', isActive ? 'scale-110' : 'group-hover/link:scale-110')} />
-            <span className="text-sm whitespace-nowrap">{label}</span>
+            <span className="text-sm whitespace-nowrap truncate">{label}</span>
           </div>
-          {isActive && <ChevronRight size={16} className="text-white/50 shrink-0" />}
+          {shortcut && (
+            <kbd className={clsx(
+              'hidden group-hover/link:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all shrink-0',
+              isActive 
+                ? 'bg-white/20 border-white/20 text-white' 
+                : 'bg-white/5 border-white/5 text-gray-500'
+            )}>
+              {shortcut}
+            </kbd>
+          )}
         </div>
       )
     }
@@ -90,15 +99,15 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSide
   }, []);
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Overview', path: '/home' },
-    { icon: Database, label: 'Database', path: '/database' },
-    { icon: Calendar, label: 'Events', path: '/events' },
-    { icon: Users, label: 'Teams', path: '/teams' },
-    { icon: User, label: 'My Profile', path: '/profile' },
+    { icon: LayoutDashboard, label: 'Overview', path: '/home', shortcut: '⌥1' },
+    { icon: Database, label: 'Database', path: '/database', shortcut: '⌥2' },
+    { icon: Calendar, label: 'Events', path: '/events', shortcut: '⌥3' },
+    { icon: Users, label: 'Teams', path: '/teams', shortcut: '⌥4' },
+    { icon: User, label: 'My Profile', path: '/profile', shortcut: '⌥5' },
   ];
 
-  const secretaryItems = [{ icon: ClipboardList, label: 'Secretary', path: '/secretary' }];
-  const adminItems = [{ icon: ShieldCheck, label: 'Super Admin', path: '/super-admin' }];
+  const secretaryItems = [{ icon: ClipboardList, label: 'Secretary', path: '/secretary', shortcut: '⌥S' }];
+  const adminItems = [{ icon: ShieldCheck, label: 'Super Admin', path: '/super-admin', shortcut: '⌥A' }];
 
   const closeMobile = () => setSidebarOpen(false);
 
@@ -109,16 +118,16 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSide
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
       if (isMobile) {
         return (
-          <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} />
+          <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} shortcut={item.shortcut} />
         );
       }
       // Desktop: collapse logic
       return sidebarCollapsed ? (
         <NavTooltip key={item.path} label={item.label}>
-          <SideNavLink icon={item.icon} label={item.label} path={item.path} collapsed={true} onClose={closeMobile} />
+          <SideNavLink icon={item.icon} label={item.label} path={item.path} collapsed={true} onClose={closeMobile} shortcut={item.shortcut} />
         </NavTooltip>
       ) : (
-        <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} />
+        <SideNavLink key={item.path} icon={item.icon} label={item.label} path={item.path} collapsed={false} onClose={closeMobile} shortcut={item.shortcut} />
       );
     });
 

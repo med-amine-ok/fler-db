@@ -4,7 +4,6 @@ export type User = {
     name: string; // profiles.full_name
     role: 'admin' | 'user'; // defaulting to user for now?
     teamId?: string; // profiles.team
-    // Computed/Mock stats
     contactCount: number;
     companyCount: number;
     eventCount: number;

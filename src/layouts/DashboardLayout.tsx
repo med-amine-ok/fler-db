@@ -1,24 +1,45 @@
 import { Sidebar } from '../components/Sidebar';
-import { Outlet, useLocation } from 'react-router-dom';
-import { Bell, LogOut, Quote, Sparkles, Heart } from 'lucide-react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, LogOut, Quote, Sparkles, Heart, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
 import { Modal } from '../components/ui/Modal';
-
+import { CommandPalette } from '../components/CommandPalette';
 import { BottomNav } from '../components/BottomNav';
 
 export const DashboardLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const pageTitle = location.pathname.split('/')[1] || 'Overview';
   const isHome = pageTitle.toLowerCase() === 'home' || pageTitle.toLowerCase() === 'overview';
   const [userName, setUserName] = useState('User');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
-  }, []);
+    
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+      
+      // Alt + number shortcuts
+      if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
+        e.preventDefault();
+        const routes = ['/home', '/database', '/events', '/teams', '/profile'];
+        const index = parseInt(e.key) - 1;
+        if (routes[index]) {
+          navigate(routes[index]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [navigate]);
 
   const fetchUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -90,13 +111,13 @@ export const DashboardLayout = () => {
         sidebarCollapsed ? "md:ml-16" : "md:ml-72"
       )}>
         {/* Background Watermark */}
-        <div className={clsx(
+        {/* <div className={clsx(
           "fixed inset-0 z-50 pointer-events-none flex items-center justify-center transition-all duration-300",
           sidebarCollapsed ? "md:ml-16" : "md:ml-72"
         )}>
           <img src="/vic.png" className="block md:hidden w-[500px] opacity-[0.2]" alt="" />
           <img src="/vic_long.png" className="hidden md:block w-[1000px] opacity-[0.2]" alt="" />
-        </div>
+        </div> */}
 
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
@@ -135,6 +156,18 @@ export const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            {/* Command Palette trigger */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 md:py-2 bg-white hover:bg-gray-50 border border-gray-200/60 rounded-full shadow-sm text-gray-400 hover:text-gray-600 transition-all text-xs md:text-sm font-medium"
+              title="Search (Ctrl+K)"
+            >
+              <Search size={16} />
+              <span className="hidden sm:inline">Search...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-500">
+                <span>⌘</span>K
+              </kbd>
+            </button>
 
             <button
               onClick={handleBellClick}
@@ -161,6 +194,11 @@ export const DashboardLayout = () => {
       </main>
 
       <BottomNav />
+
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
 
       <Modal
         isOpen={isNotificationOpen}

@@ -1,15 +1,17 @@
 import type { User, Event, Team, Company, Resource } from './types';
 
 export const mockEvents: Event[] = [
-    { id: '1', name: 'AEC', date: '2024-06-15', status: 'ongoing', description: 'Algeria Engineering Competition.', logo: 'https://cdn-icons-png.flaticon.com/512/3067/3067258.png' },
-    { id: '2', name: 'GALA', date: '2024-04-20', status: 'ongoing', description: 'Our premium event.', logo: 'https://cdn-icons-png.flaticon.com/512/1256/1256650.png' },
-    { id: '3', name: 'Polymaze', date: '2024-03-10', status: 'ongoing', description: 'Robotics competition.', logo: 'https://cdn-icons-png.flaticon.com/512/9902/9902263.png' },
-    { id: '4', name: 'Charity', date: '2024-12-25', status: 'ongoing', description: 'Charity project.', logo: 'https://cdn-icons-png.flaticon.com/512/2904/2904843.png' },
+    { id: '1', name: 'AEC', date: '2026-05-10', status: 'finished', description: 'Algerian Engineering Competition. A national competition bringing together top engineering talent from 6 wilayas.', logo: '/AEC.png' },
+    { id: '2', name: 'GALA', date: '2026-04-20', status: 'ongoing', description: 'Annual premium networking event gathering partners, sponsors, and key club members.', logo: '/gala.svg' },
+    { id: '3', name: 'Polymaze', date: '2026-06-15', status: 'finished', description: 'Highly-anticipated robotics competition designed around autonomous navigation and hardware ingenuity.', logo: '/polymaze.png' },
+    { id: '4', name: 'Charity', date: '2026-12-25', status: 'planned', description: 'Sponsoring and coordination workspace for the yearly winter donation drive.', logo: '/charity.png' },
+    { id: '5', name: 'STEPS', date: '2026-10-05', status: 'ongoing', description: 'Career path mentoring program and student startup bootcamp.', logo: '/STEPS LOGO-01.png' },
+    { id: '6', name: 'MasterClass', date: '2026-09-12', status: 'ongoing', description: 'Specialized technology seminars and hands-on workshops with industry experts.', logo: '/masterclass04.png' },
 ];
 
 export const mockTeams: Team[] = [
-    { id: '1', name: 'Logistics', description: 'Handling venues, transport, and equipment.', memberCount: 5 },
-    { id: '2', name: 'Sponsoring', description: 'Managing corporate partnerships.', memberCount: 8 },
+    { id: '1', name: 'Logistics', description: 'Handling venues, transport, accommodation, and equipment allocation.', memberCount: 12 },
+    { id: '2', name: 'Sponsoring', description: 'Pitching, contract signing, and relationship management with corporate partners.', memberCount: 16 },
 ];
 
 export const mockResources: Resource[] = [

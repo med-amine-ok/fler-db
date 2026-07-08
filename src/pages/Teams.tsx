@@ -2,12 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { Users, ChevronRight, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { mockTeams } from '../lib/mockData';
 import type { Team } from '../lib/types';
 
 export const Teams = () => {
   const navigate = useNavigate();
-  const [teams, setTeams] = useState<Team[]>(mockTeams);
+  const [teams, setTeams] = useState<Team[]>([
+    { id: 'logistics', name: 'Logistics', description: 'Handling venues, transport, accommodation, and equipment allocation.', memberCount: 0 },
+    { id: 'sponsoring', name: 'Sponsoring', description: 'Pitching, contract signing, and relationship management with corporate partners.', memberCount: 0 },
+  ]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

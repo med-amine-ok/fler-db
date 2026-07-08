@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft, Building2 } from 'lucide-react';
-import { mockCompanies } from '../lib/mockData';
+import { supabase } from '../lib/supabase';
 
 export const TeamReport = () => {
   const navigate = useNavigate();
+  const [companies, setCompanies] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     companyId: '',
     progress: 0,
     notes: ''
   });
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      const { data, error } = await supabase.from('companies').select('id, name, status');
+      if (error) throw error;
+      if (data) setCompanies(data);
+    } catch (err) {
+      console.error('Error fetching companies:', err);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +56,7 @@ export const TeamReport = () => {
                   required
                 >
                   <option value="">Select a company</option>
-                  {mockCompanies.map(c => (
+                  {companies.map(c => (
                     <option key={c.id} value={c.id}>{c.name} ({c.status})</option>
                   ))}
                 </select>

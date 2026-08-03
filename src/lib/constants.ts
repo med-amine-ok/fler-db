@@ -103,6 +103,12 @@ export const ALLOWED_EMAILS = [
     'alae.taklit@g.enp.edu.dz',
     'alae.bouteller@g.enp.edu.dz',
     'hanine.lahouel@g.enp.edu.dz',
+    'aboubaker_taki_eddine.bencheikh@g.enp.edu.dz',
+    'rami.ahmane@g.enp.edu.dz',
+    'sarah_lyna.amara@g.enp.edu.dz',
+    'ibrahim_moubarek.seraghni@g.enp.edu.dz',
+
+
 ].map(email => email.toLowerCase().trim());
 
 export const SUPER_ADMIN_EMAIL = 'mohamed_amine.ould_khaoua@g.enp.edu.dz';

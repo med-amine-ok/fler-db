@@ -34,6 +34,7 @@ export type Company = {
     assignedTo?: string; // profiles.full_name
     contactMethod?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media';
     notes?: string;
+    createdAt?: string;
 };
 
 export type Resource = {
@@ -45,4 +46,5 @@ export type Resource = {
     contactMethod?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media';
     assignedTo?: string;
     notes?: string;
+    createdAt?: string;
 };

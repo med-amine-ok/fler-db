@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Calendar, Database, User, ShieldCheck, ClipboardList, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, Calendar, Database, User, ShieldCheck, ClipboardList, ChevronLeft, Truck } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
 import { useEffect, useRef, useState } from 'react';
@@ -102,7 +102,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSide
     { icon: LayoutDashboard, label: 'Overview', path: '/home', shortcut: '⌥1' },
     { icon: Database, label: 'Database', path: '/database', shortcut: '⌥2' },
     { icon: Calendar, label: 'Events', path: '/events', shortcut: '⌥3' },
-    { icon: Users, label: 'Teams', path: '/teams', shortcut: '⌥4' },
+    { icon: Truck, label: 'Logistics Teams', path: '/teams/logistics', shortcut: '⌥4' },
     { icon: User, label: 'My Profile', path: '/profile', shortcut: '⌥5' },
   ];
 

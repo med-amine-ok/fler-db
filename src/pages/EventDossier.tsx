@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Copy, Download, Check, Loader2, Calendar, Target, 
-  Plus, ClipboardCheck, AlertCircle, ArrowUpRight
+  Plus, ClipboardCheck, AlertCircle, ArrowUpRight, Filter, Hotel, Home, Coffee, Gift, Truck, CircleDot
 } from 'lucide-react';
+import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -15,7 +16,7 @@ export const EventDossier = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'sponsoring' | 'logistics' | 'team' | 'documents' | 'stats'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sponsoring' | 'logistics'  | 'documents' | 'stats'>('overview');
   
   // Copy state
   const [copied, setCopied] = useState(false);
@@ -24,6 +25,7 @@ export const EventDossier = () => {
   // Event specific data
   const [companies, setCompanies] = useState<Company[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
+  const [logisticsTypeFilter, setLogisticsTypeFilter] = useState<string>('all');
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   useEffect(() => {
@@ -72,7 +74,8 @@ export const EventDossier = () => {
           eventId: eventId,
           assignedTo: c.profiles?.full_name || 'Unassigned',
           contactMethod: c.contact_method,
-          notes: c.notes
+          notes: c.notes,
+          createdAt: c.created_at
         })));
       } else {
         setCompanies([]);
@@ -90,7 +93,8 @@ export const EventDossier = () => {
           type: l.type as any,
           status: l.status,
           assignedTo: l.profiles?.full_name || 'Unassigned',
-          notes: l.notes
+          notes: l.notes,
+          createdAt: l.created_at
         })));
       } else {
         setResources([]);
@@ -339,7 +343,7 @@ Cordialement,`,
 
       {/* Tabs navigation */}
       <div className="border-b border-gray-200 flex gap-2 md:gap-4 overflow-x-auto pb-px scrollbar-none">
-        {(['overview', 'sponsoring', 'logistics', 'team', 'documents', 'stats'] as const).map((tab) => (
+        {(['overview', 'sponsoring', 'logistics', 'documents', 'stats'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -453,7 +457,7 @@ Cordialement,`,
                       <th className="p-4">Status</th>
                       <th className="p-4">Contact Method</th>
                       <th className="p-4">Assigned Manager</th>
-                      <th className="p-4 pr-6 text-right">Actions</th>
+                      
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 font-medium">
@@ -472,16 +476,7 @@ Cordialement,`,
                           </td>
                           <td className="p-4 text-gray-500 capitalize">{company.contactMethod || 'Email'}</td>
                           <td className="p-4 text-gray-500">{company.assignedTo}</td>
-                          <td className="p-4 pr-6 text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-xs text-primary rounded-lg font-bold"
-                              onClick={() => navigate(`/teams/sponsoring`)}
-                            >
-                              Edit <ArrowUpRight size={12} className="ml-0.5" />
-                            </Button>
-                          </td>
+                         
                         </tr>
                       ))
                     ) : (
@@ -497,69 +492,108 @@ Cordialement,`,
         )}
 
         {/* TAB 3: LOGISTICS */}
-        {activeTab === 'logistics' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center flex-wrap gap-4">
-              <div>
-                <h3 className="font-bold text-lg text-text">Resource & Logistics Log</h3>
-                <p className="text-xs text-gray-400">Materials, venues, and accommodation bookings requested for this event.</p>
-              </div>
-              <Button size="sm" onClick={() => navigate('/teams/logistics/add')}>
-                <Plus size={14} className="mr-1" /> Add Logistics Request
-              </Button>
-            </div>
+        {activeTab === 'logistics' && (() => {
+          const getResourceIcon = (type?: string) => {
+            switch (type?.toLowerCase()) {
+              case 'hotel': return <Hotel size={16} className="text-blue-500 shrink-0" />;
+              case 'salle': return <Home size={16} className="text-purple-500 shrink-0" />;
+              case 'food': return <Coffee size={16} className="text-amber-500 shrink-0" />;
+              case 'goodies':
+              case 'goodie': return <Gift size={16} className="text-pink-500 shrink-0" />;
+              case 'passage': return <Truck size={16} className="text-emerald-500 shrink-0" />;
+              default: return <CircleDot size={16} className="text-gray-500 shrink-0" />;
+            }
+          };
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {resources.length > 0 ? (
-                resources.map((res) => (
-                  <Card key={res.id} className="p-5 border-0 shadow-lg rounded-2xl bg-white space-y-4">
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-bold text-text truncate">{res.name}</h4>
-                      <Badge variant={res.status === 'booked' ? 'success' : 'default'} className="uppercase">
-                        {res.status}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2 text-xs md:text-sm">
-                      <div className="flex justify-between py-0.5 border-b border-gray-50">
-                        <span className="text-gray-400">Resource Type</span>
-                        <span className="font-semibold text-text capitalize">{res.type}</span>
-                      </div>
-                      <div className="flex justify-between py-0.5">
-                        <span className="text-gray-400">Allocated To</span>
-                        <span className="font-semibold text-text">{res.assignedTo || 'Unassigned'}</span>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full py-12 text-center text-gray-400">
-                  <AlertCircle size={32} className="mx-auto text-gray-300 mb-2" />
-                  <p className="text-sm">No logistics resources currently allocated.</p>
+          const filteredResources = resources.filter((res) => {
+            if (logisticsTypeFilter === 'all') return true;
+            if (logisticsTypeFilter === 'goodie' || logisticsTypeFilter === 'goodies') {
+              return res.type === 'goodie' || res.type === 'goodies';
+            }
+            return res.type?.toLowerCase() === logisticsTypeFilter.toLowerCase();
+          });
+
+          return (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                  <h3 className="font-bold text-lg text-text">Resource & Logistics Log</h3>
+                  <p className="text-xs text-gray-400">Materials, venues, and accommodation bookings requested for this event.</p>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+                <Button size="sm" onClick={() => navigate('/teams/logistics/add')}>
+                  <Plus size={14} className="mr-1" /> Add Logistics Request
+                </Button>
+              </div>
 
-        {/* TAB 4: TEAM MEMBERS */}
-        {activeTab === 'team' && (
-          <div className="space-y-6">
-            <h3 className="font-bold text-lg text-text">Event Organizing Team</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teamMembers.map((member) => (
-                <Card key={member.id} className="p-5 border-0 shadow-lg rounded-2xl bg-white flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
-                    {member.full_name.split(' ').map((n: string) => n[0]).join('')}
+              {/* Type Filter Chips */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <span className="text-xs font-semibold text-gray-400 shrink-0 flex items-center gap-1">
+                  <Filter size={12} /> Type:
+                </span>
+                {[
+                  { id: 'all', label: 'All Types' },
+                  { id: 'hotel', label: 'Hotel' },
+                  { id: 'salle', label: 'Salle' },
+                  { id: 'food', label: 'Food' },
+                  { id: 'goodie', label: 'Goodies' },
+                  { id: 'passage', label: 'Passage' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setLogisticsTypeFilter(t.id)}
+                    className={clsx(
+                      "px-3 py-1.5 rounded-xl text-xs font-bold transition-all capitalize whitespace-nowrap",
+                      logisticsTypeFilter === t.id
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredResources.length > 0 ? (
+                  filteredResources.map((res) => (
+                    <Card key={res.id} className="p-5 border-0 shadow-lg rounded-2xl bg-white space-y-4">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {getResourceIcon(res.type)}
+                          <h4 className="font-bold text-text truncate">{res.name}</h4>
+                        </div>
+                        <Badge variant={res.status === 'booked' ? 'success' : 'default'} className="uppercase shrink-0">
+                          {res.status}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2 text-xs md:text-sm">
+                        <div className="flex justify-between py-0.5 border-b border-gray-50">
+                          <span className="text-gray-400">Resource Type</span>
+                          <span className="font-semibold text-text capitalize">{res.type}</span>
+                        </div>
+                        <div className="flex justify-between py-0.5">
+                          <span className="text-gray-400">Allocated To</span>
+                          <span className="font-semibold text-text">{res.assignedTo || 'Unassigned'}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-full py-12 text-center text-gray-400">
+                    <AlertCircle size={32} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-sm">
+                      {resources.length === 0
+                        ? "No logistics resources currently allocated."
+                        : `No ${logisticsTypeFilter === 'all' ? '' : logisticsTypeFilter} logistics resources found.`}
+                    </p>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-text truncate">{member.full_name}</h4>
-                    <p className="text-xs text-gray-400">{member.role} • {member.team}</p>
-                  </div>
-                </Card>
-              ))}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
+
+    
 
         {/* TAB 5: DOCUMENTS */}
         {activeTab === 'documents' && (
@@ -612,65 +646,183 @@ Cordialement,`,
           </div>
         )}
 
-        {/* TAB 6: STATISTICS */}
-        {activeTab === 'stats' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-6 border-0 shadow-lg rounded-2xl bg-white space-y-4 flex flex-col justify-between">
-              <div>
-                <h3 className="font-bold text-lg text-text">Weekly Contract Signings</h3>
-                <p className="text-xs text-gray-400">Total contracts signed week over week.</p>
-              </div>
-              <div className="w-full h-36 pt-4">
-                <svg viewBox="0 0 400 100" className="w-full h-full overflow-visible">
-                  <path d="M0,90 Q50,75 100,50 T200,30 T300,10 L400,5" fill="none" stroke="#127dbb" strokeWidth="4" />
-                  <circle cx="100" cy="50" r="4" fill="#127dbb" />
-                  <circle cx="200" cy="30" r="4" fill="#127dbb" />
-                  <circle cx="300" cy="10" r="4" fill="#127dbb" />
-                  <circle cx="400" cy="5" r="5" fill="#69c4af" />
-                </svg>
-              </div>
-              <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mt-4">
-                <span>Week 1</span>
-                <span>Week 2</span>
-                <span>Week 3</span>
-                <span>Week 4</span>
-              </div>
-            </Card>
+        {/* TAB 5: STATISTICS */}
+        {activeTab === 'stats' && (() => {
+          // Real calculations from database state
+          const totalCompanies = companies.length || 1;
+          const contactedCompanies = companies.filter(c => c.status === 'contacted').length;
+          const pendingCompanies = companies.filter(c => c.status === 'pending').length;
+          const signedCompanies = companies.filter(c => c.status === 'signed').length;
+          const rejectedCompanies = companies.filter(c => c.status === 'rejected').length;
 
-            <Card className="p-6 border-0 shadow-lg rounded-2xl bg-white space-y-4">
-              <h3 className="font-bold text-lg text-text">Operational Distribution</h3>
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span>Sponsorship Outreach</span>
-                    <span>{completionRate}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: `${completionRate}%` }}></div>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span>Logistics Procurement</span>
-                    <span>{logisticsPercent}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                    <div className="bg-secondary h-2 rounded-full" style={{ width: `${logisticsPercent}%` }}></div>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span>Administrative Verification</span>
-                    <span>80%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                    <div className="bg-text h-2 rounded-full" style={{ width: '80%' }}></div>
-                  </div>
-                </div>
+          const contactedPct = Math.round((contactedCompanies / totalCompanies) * 100);
+          const pendingPct = Math.round((pendingCompanies / totalCompanies) * 100);
+          const signedPct = Math.round((signedCompanies / totalCompanies) * 100);
+          const rejectedPct = Math.round((rejectedCompanies / totalCompanies) * 100);
+
+          const totalResources = resources.length || 1;
+          const bookedResources = resources.filter(r => r.status === 'booked').length;
+          const logisticsPct = Math.round((bookedResources / totalResources) * 100);
+
+          // Calculate weekly signed contracts dynamically from DB timestamps
+          const weekBuckets = [0, 0, 0, 0]; // W1, W2, W3, W4
+          const signedList = companies.filter(c => c.status === 'signed');
+          
+          if (signedList.length > 0) {
+            const sortedDates = signedList
+              .map(c => c.createdAt ? new Date(c.createdAt).getTime() : Date.now())
+              .sort((a, b) => a - b);
+            const firstDate = sortedDates[0];
+            const lastDate = sortedDates[sortedDates.length - 1];
+            const timeSpan = Math.max(lastDate - firstDate, 1000 * 60 * 60 * 24 * 28); // at least 28 days
+
+            signedList.forEach(c => {
+              const t = c.createdAt ? new Date(c.createdAt).getTime() : Date.now();
+              const ratio = (t - firstDate) / timeSpan;
+              const idx = Math.min(3, Math.floor(ratio * 4));
+              weekBuckets[idx] += 1;
+            });
+          }
+
+          const maxWeekly = Math.max(...weekBuckets, 1);
+          // Generate SVG points: viewBox 0 0 400 100
+          const xPos = [20, 140, 260, 380];
+          const yPos = weekBuckets.map(val => Math.round(85 - (val / maxWeekly) * 65));
+          const pathD = `M ${xPos[0]},${yPos[0]} C ${xPos[0]+40},${yPos[0]} ${xPos[1]-40},${yPos[1]} ${xPos[1]},${yPos[1]} C ${xPos[1]+40},${yPos[1]} ${xPos[2]-40},${yPos[2]} ${xPos[2]},${yPos[2]} C ${xPos[2]+40},${yPos[2]} ${xPos[3]-40},${yPos[3]} ${xPos[3]},${yPos[3]}`;
+
+          return (
+            <div className="space-y-6">
+              {/* Stat Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="p-4 border-0 shadow-md bg-white rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Outreach</span>
+                  <p className="text-xl md:text-2xl font-black text-text">{companies.length}</p>
+                  <span className="text-[11px] text-gray-500 font-medium">Sponsors Targeted</span>
+                </Card>
+                <Card className="p-4 border-0 shadow-md bg-white rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Signed Deals</span>
+                  <p className="text-xl md:text-2xl font-black text-emerald-600">{signedCompanies}</p>
+                  <span className="text-[11px] text-emerald-500 font-bold">{signedPct}% Conversion</span>
+                </Card>
+                <Card className="p-4 border-0 shadow-md bg-white rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active Pipeline</span>
+                  <p className="text-xl md:text-2xl font-black text-blue-600">{pendingCompanies + contactedCompanies}</p>
+                  <span className="text-[11px] text-blue-500 font-bold">{pendingPct + contactedPct}% In-Progress</span>
+                </Card>
+                <Card className="p-4 border-0 shadow-md bg-white rounded-2xl space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Logistics Booked</span>
+                  <p className="text-xl md:text-2xl font-black text-purple-600">{bookedResources} / {resources.length}</p>
+                  <span className="text-[11px] text-purple-500 font-bold">{logisticsPct}% Secured</span>
+                </Card>
               </div>
-            </Card>
-          </div>
-        )}
+
+              {/* Main Charts Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Weekly Contract Signings (Real DB dynamic chart) */}
+                <Card className="p-6 border-0 shadow-lg rounded-2xl bg-white space-y-4 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <h3 className="font-bold text-lg text-text">Weekly Contract Signings</h3>
+                      <Badge variant="success" className="text-[10px] font-bold uppercase">{signedCompanies} Signed Total</Badge>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">Calculated from actual database record dates.</p>
+                  </div>
+                  
+                  <div className="w-full h-40 pt-4 relative">
+                    <svg viewBox="0 0 400 100" className="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#127dbb" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#127dbb" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d={`${pathD} L 380,95 L 20,95 Z`}
+                        fill="url(#chartGradient)"
+                      />
+                      <path
+                        d={pathD}
+                        fill="none"
+                        stroke="#127dbb"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                      {xPos.map((x, i) => (
+                        <g key={i}>
+                          <circle cx={x} cy={yPos[i]} r="5" fill="#127dbb" />
+                          <circle cx={x} cy={yPos[i]} r="2.5" fill="#ffffff" />
+                        </g>
+                      ))}
+                    </svg>
+                  </div>
+
+                  <div className="grid grid-cols-4 text-center text-[10px] font-bold text-gray-500 border-t border-gray-100 pt-3">
+                    {weekBuckets.map((val, idx) => (
+                      <div key={idx} className="space-y-0.5">
+                        <span className="block text-gray-400 uppercase">Week {idx + 1}</span>
+                        <span className="block text-xs font-black text-text">{val} {val === 1 ? 'deal' : 'deals'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Real DB Operational Distribution */}
+                <Card className="p-6 border-0 shadow-lg rounded-2xl bg-white space-y-5">
+                  <div>
+                    <h3 className="font-bold text-lg text-text">Operational Distribution</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">Real-time status metrics from current database tables.</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Signed */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-600">Sponsorship Signed ({signedCompanies}/{companies.length})</span>
+                        <span className="text-emerald-600 font-bold">{signedPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${signedPct}%` }}></div>
+                      </div>
+                    </div>
+
+                    {/* Pending & Contacted */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-600">In-Progress Pipeline ({pendingCompanies + contactedCompanies}/{companies.length})</span>
+                        <span className="text-primary font-bold">{pendingPct + contactedPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-primary h-2.5 rounded-full transition-all duration-500" style={{ width: `${pendingPct + contactedPct}%` }}></div>
+                      </div>
+                    </div>
+
+                    {/* Logistics Procurement */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-600">Logistics Procurement ({bookedResources}/{resources.length})</span>
+                        <span className="text-purple-600 font-bold">{logisticsPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-purple-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${logisticsPct}%` }}></div>
+                      </div>
+                    </div>
+
+                    {/* Rejected / Closed */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-600">Closed / Declined Leads ({rejectedCompanies}/{companies.length})</span>
+                        <span className="text-gray-400 font-bold">{rejectedPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                        <div className="bg-gray-300 h-2.5 rounded-full transition-all duration-500" style={{ width: `${rejectedPct}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Copy, Download, Check, Loader2, Calendar, Target, 
-  Plus, ClipboardCheck, AlertCircle, ArrowUpRight, Filter, Hotel, Home, Coffee, Gift, Truck, CircleDot
+  Plus, ClipboardCheck, AlertCircle, Filter, Hotel, Home, Coffee, Gift, Truck, CircleDot
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -294,7 +294,6 @@ Cordialement,`,
   const fundsRaised = signedSponsors * 150000; // estimated 150k DA per contract
   const logisticsBooked = resources.filter(r => r.status === 'booked').length;
   const logisticsPercent = resources.length ? Math.round((logisticsBooked / resources.length) * 100) : 0;
-  const completionRate = totalSponsors ? Math.round((signedSponsors / totalSponsors) * 100) : 0;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-16 px-4 md:px-0">

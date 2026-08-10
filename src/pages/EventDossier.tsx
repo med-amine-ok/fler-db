@@ -157,7 +157,7 @@ Le sponsoring de votre entreprise contribuerait significativement à renforcer l
 
     'GALA': `rahi fl drive`,
 
-    'STEPS': `mzl`,
+    'STEPS': `odkhlo l drive https://drive.google.com/drive/u/2/folders/1ftirs_79wcQ_3GJLrutVBSCc3oZqq4xH`,
 
     'MasterClass': `mzl`,
 
@@ -213,7 +213,20 @@ pour tout complément d'information.
 
 Cordialement,`,
 
-    'STEPS': `mzl`,
+    'STEPS': `Madame, Monsieur,
+
+Dans le cadre de l’organisation de STEPS, qui se tiendra en octobre 2026, nous avons l’honneur de vous contacter afin de vous proposer une collaboration en tant que partenaire de notre événement.
+
+Organisé par le Vision and Innovation Club (ViC), club scientifique de l’École Nationale Polytechnique d’Alger (ENP), STEPS réunira étudiants et professionnels autour des études à l’étranger, de la mobilité internationale, de la formation et de l’orientation professionnelle.
+
+Vous trouverez en pièce jointe notre dossier de sponsoring, présentant l’événement et les différentes possibilités de collaboration.
+
+Nous serions ravis d’échanger avec vous au sujet d’un éventuel partenariat.
+
+Cordialement,
+
+[Nom et Prénom]
+[Fonction au sein du club]`,
 
     'MasterClass': `mzl`,
 

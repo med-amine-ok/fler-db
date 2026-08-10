@@ -25,10 +25,12 @@ import {
     ChevronDown,
     ChevronUp,
     Filter,
+    X,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
+import { advancedMatch } from '../utils/search';
 
 /* ─────────────────────── Types ─────────────────────── */
 
@@ -121,11 +123,7 @@ export const Secretary = () => {
         let result = [...members];
 
         if (searchTerm) {
-            const q = searchTerm.toLowerCase();
-            result = result.filter(m =>
-                m.full_name?.toLowerCase().includes(q) ||
-                m.email?.toLowerCase().includes(q)
-            );
+            result = result.filter(m => advancedMatch(m, searchTerm));
         }
 
         if (filterTeam !== 'all') {
@@ -456,11 +454,21 @@ export const Secretary = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <input
                                 type="text"
-                                placeholder="Search member…"
+                                placeholder="Search member by name, email..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="pl-9 pr-4 py-2 bg-gray-100/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 w-full sm:w-52 text-sm font-semibold"
+                                className="pl-9 pr-8 py-2 bg-gray-100/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 w-full sm:w-60 text-sm font-semibold"
                             />
+                            {searchTerm && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Clear search"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
                         </div>
                         <div className="relative">
                             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />

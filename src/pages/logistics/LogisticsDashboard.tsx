@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Loader2, ArrowLeft, Hotel, Home, Coffee, Gift, CircleDot } from 'lucide-react';
+import { Plus, Search, Loader2, ArrowLeft, Hotel, Home, Coffee, Gift, CircleDot, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../../lib/supabase';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { advancedMatch } from '../../utils/search';
 
 export const LogisticsDashboard = () => {
     const navigate = useNavigate();
@@ -36,8 +37,7 @@ export const LogisticsDashboard = () => {
     };
 
     const filteredData = resources.filter(r => {
-        const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              r.type?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = advancedMatch(r, searchTerm);
         const matchesStatus = activeFilter === 'all' || r.status === activeFilter;
         const matchesType = typeFilter === 'all' || r.type === typeFilter;
         return matchesSearch && matchesStatus && matchesType;
@@ -120,11 +120,21 @@ export const LogisticsDashboard = () => {
                         <Search className="absolute left-3.5 top-3.5 text-gray-400 w-4 h-4" />
                         <input 
                             type="text" 
-                            placeholder="Search resources by name or type..." 
-                            className="w-full pl-10 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:border-primary outline-none text-xs md:text-sm transition-all"
+                            placeholder="Search resources, venues, contacts, details..." 
+                            className="w-full pl-10 pr-9 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:border-primary outline-none text-xs md:text-sm transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                        {searchTerm && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                                title="Clear search"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
                     </div>
                     
                     {/* Type Filter Chips */}

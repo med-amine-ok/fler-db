@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, Database as DatabaseIcon, Loader2, Edit2, Trash2 } from 'lucide-react';
+import { Search, Filter, Plus, Database as DatabaseIcon, Loader2, Edit2, Trash2, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { Sheet } from '../components/ui/Sheet';
 import { supabase } from '../lib/supabase';
 import { SUPER_ADMIN_EMAIL } from '../lib/constants';
+import { advancedMatch } from '../utils/search';
 
 type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods' | 'Passages';
 
@@ -155,7 +156,7 @@ export const Database = () => {
   };
 
   const filteredData = data.filter(item => {
-    const matchesSearch = JSON.stringify(item).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = advancedMatch(item, searchTerm);
     const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
     const matchesContactMethod = !selectedContactMethod || item.contact_method === selectedContactMethod;
     return matchesSearch && matchesUser && matchesContactMethod;
@@ -481,11 +482,21 @@ export const Database = () => {
               <Search className="absolute left-3 top-2.5 md:top-3 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-9 md:pl-10 pr-4 py-2 md:py-2.5 rounded-xl border border-gray-200 focus:border-primary outline-none text-xs md:text-sm transition-all shadow-sm md:shadow-none"
+                placeholder="Search by name, email, phone, company, role..."
+                className="w-full pl-9 md:pl-10 pr-9 py-2 md:py-2.5 rounded-xl border border-gray-200 focus:border-primary outline-none text-xs md:text-sm transition-all shadow-sm md:shadow-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-2.5 md:top-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
             <Button
               variant="outline"

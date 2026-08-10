@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Database, Users, User, CornerDownLeft, Sparkles, Building2, Box } from 'lucide-react';
 import { clsx } from 'clsx';
+import { advancedMatch } from '../utils/search';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -66,9 +67,11 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   ];
 
   const filteredItems = items.filter(item =>
-    item.title.toLowerCase().includes(query.toLowerCase()) ||
-    item.description.toLowerCase().includes(query.toLowerCase()) ||
-    item.category.toLowerCase().includes(query.toLowerCase())
+    advancedMatch({
+      title: item.title,
+      description: item.description,
+      category: item.category,
+    }, query)
   );
 
   useEffect(() => {

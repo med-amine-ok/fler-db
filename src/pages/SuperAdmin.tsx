@@ -16,10 +16,13 @@ import {
     History,
     Lock,
     ArrowUpRight,
-    PieChart
+    PieChart,
+    X,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
+import { advancedMatch } from '../utils/search';
 import { Modal } from '../components/ui/Modal';
 
 interface Stats {
@@ -189,12 +192,8 @@ export const SuperAdmin = () => {
     };
 
     const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            (user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email?.toLowerCase().includes(searchTerm.toLowerCase()));
-
+        const matchesSearch = advancedMatch(user, searchTerm);
         const matchesTeam = filterTeam === 'all' || user.team === filterTeam;
-
         return matchesSearch && matchesTeam;
     });
 
@@ -303,11 +302,21 @@ export const SuperAdmin = () => {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
                                     type="text"
-                                    placeholder="Filter Team..."
+                                    placeholder="Search users by name, email..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-4 py-2 bg-gray-100/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 w-full sm:w-56 transition-all text-sm font-semibold"
+                                    className="pl-9 pr-8 py-2 bg-gray-100/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 w-full sm:w-60 transition-all text-sm font-semibold"
                                 />
+                                {searchTerm && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        title="Clear search"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
                             </div>
                             <select
                                 value={filterTeam}

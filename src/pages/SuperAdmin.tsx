@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
+
 import { advancedMatch } from '../utils/search';
 import { Modal } from '../components/ui/Modal';
 

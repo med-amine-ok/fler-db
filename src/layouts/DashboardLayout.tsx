@@ -1,6 +1,6 @@
 import { Sidebar } from '../components/Sidebar';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, Quote, Sparkles, Heart, Search } from 'lucide-react';
+import { Bell, LogOut, Quote, Sparkles, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -217,9 +217,7 @@ export const DashboardLayout = () => {
             </p>
 
             <Quote className="absolute -bottom-6 -right-2 w-8 h-8 text-primary/10" />
-          </div>
-
-         
+          </div> 
         </div>
       </Modal>
     </div>

@@ -31,7 +31,7 @@ export const Home = () => {
     completionRate: 0
   });
   const [recentEvents, setRecentEvents] = useState<Event[]>([]);
-  const [totalFunds, setTotalFunds] = useState(0);
+  const [, setTotalFunds] = useState(0);
 
   const [loading, setLoading] = useState(true);
   

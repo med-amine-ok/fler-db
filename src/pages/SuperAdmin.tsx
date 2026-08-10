@@ -175,7 +175,7 @@ export const SuperAdmin = () => {
     const handleExportData = () => {
         const csvContent = "data:text/csv;charset=utf-8,"
             + "Name,Email,Team,Ranking,Activities,Joined\n"
-            + users.map(u => `${u.full_name},${u.email},${u.team || 'Unassigned'},${u.ranking || 0},${u.activities_count},${new Date(u.created_at).toLocaleDateString()}`).join("\n");
+            + users.map(u => `${u.full_name},${u.email},${u.team || 'Unassigned'},${u.ranking || 0},${u.activities_count},${new Date(u.created_at).toLocaleDateString('en-US')}`).join("\n");
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -484,7 +484,7 @@ export const SuperAdmin = () => {
                                 </div>
                             </div>
                             <p className="text-[10px] font-black text-gray-400">
-                                {new Date(a.created_at).toLocaleString()}
+                                {new Date(a.created_at).toLocaleString('en-US')}
                             </p>
                         </div>
                     )) : (

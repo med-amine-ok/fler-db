@@ -28,9 +28,19 @@ export const Database = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<any>(null);
-  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
+
+  const hasActiveFilters = Boolean(selectedUser || selectedEvent || selectedContactMethod);
+
+  const resetFilters = () => {
+    setSelectedUser(null);
+    setSelectedEvent(null);
+    setSelectedContactMethod(null);
+    setSortBy('newest');
+  };
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods', 'Passages'];
 
@@ -159,7 +169,8 @@ export const Database = () => {
     const matchesSearch = advancedMatch(item, searchTerm);
     const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
     const matchesContactMethod = !selectedContactMethod || item.contact_method === selectedContactMethod;
-    return matchesSearch && matchesUser && matchesContactMethod;
+    const matchesEvent = !selectedEvent || (item.event_id && String(item.event_id) === String(selectedEvent));
+    return matchesSearch && matchesUser && matchesContactMethod && matchesEvent;
   }).sort((a, b) => {
     switch (sortBy) {
       case 'newest':
@@ -499,11 +510,14 @@ export const Database = () => {
               )}
             </div>
             <Button
-              variant="outline"
-              className="px-3 border-gray-200 rounded-xl bg-white shadow-sm md:shadow-none"
+              variant={hasActiveFilters ? "primary" : "outline"}
+              className="px-3 border-gray-200 rounded-xl bg-white shadow-sm md:shadow-none relative"
               onClick={() => setIsFilterOpen(true)}
             >
               <Filter size={16} className="md:w-5 md:h-5" />
+              {hasActiveFilters && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-white" />
+              )}
             </Button>
           </div>
         </div>
@@ -584,6 +598,20 @@ export const Database = () => {
           </div>
 
           <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by Event</label>
+            <select
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white text-sm"
+              value={selectedEvent || ''}
+              onChange={(e) => setSelectedEvent(e.target.value || null)}
+            >
+              <option value="">All Events</option>
+              {events.map(event => (
+                <option key={event.id} value={String(event.id)}>{event.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by User</label>
             <select
               className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white text-sm"
@@ -616,8 +644,13 @@ export const Database = () => {
             </div>
           )}
 
-          <div className="pt-4 mt-auto">
-            <Button className="w-full" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>
+          <div className="pt-4 mt-auto flex gap-2">
+            {hasActiveFilters && (
+              <Button variant="outline" className="flex-1 border-gray-200" onClick={resetFilters}>
+                Reset
+              </Button>
+            )}
+            <Button className="flex-1" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>
           </div>
         </div>
       </Sheet>

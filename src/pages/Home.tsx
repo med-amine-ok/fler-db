@@ -132,7 +132,7 @@ export const Home = () => {
           id: act.id.toString(),
           user: act.profiles?.full_name || 'Team member',
           action: `updated sponsor outreach details`,
-          time: new Date(act.created_at).toLocaleDateString(),
+          time: new Date(act.created_at).toLocaleDateString('en-US'),
           badgeText: 'Database'
         })));
       } else {
@@ -193,9 +193,7 @@ export const Home = () => {
             <div className="space-y-1">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Partnerships</p>
               <h3 className="text-3xl md:text-4xl font-black mt-2 text-text tracking-tighter">{stats.contactCount}</h3>
-              <div className="flex items-center gap-1.5 mt-2.5 text-emerald-500 text-xs font-semibold">
-                <TrendingUp size={14} /> <span>{totalFunds.toLocaleString()} DA raised</span>
-              </div>
+              
             </div>
             <div className="p-3 bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-lg shadow-primary/30 flex-shrink-0">
               <Briefcase size={22} />

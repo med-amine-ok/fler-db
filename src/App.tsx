@@ -119,12 +119,13 @@ function App() {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
           console.log('Profile check failed, signing out');
+          const email = session.user.email || '';
           await supabase.auth.signOut();
           if (isMounted) {
             setSession(null);
             setLoading(false);
             setAuthInitialized(true);
-            window.location.href = `/?error=${result.error || 'unauthorized'}`;
+            window.location.href = `/?error=${result.error || 'unauthorized'}&email=${encodeURIComponent(email)}`;
           }
           return;
         }
@@ -157,12 +158,13 @@ function App() {
         const result = await createProfileIfNeeded(session.user);
         if (!result.success) {
           console.log('Profile check failed on auth change, signing out');
+          const email = session.user.email || '';
           await supabase.auth.signOut();
           if (isMounted) {
             setSession(null);
             setLoading(false);
             setAuthInitialized(true);
-            window.location.href = `/?error=${result.error || 'unauthorized'}`;
+            window.location.href = `/?error=${result.error || 'unauthorized'}&email=${encodeURIComponent(email)}`;
           }
           return;
         }

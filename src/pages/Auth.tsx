@@ -6,23 +6,51 @@ import { Loader2, AlertCircle } from 'lucide-react';
 export const Auth = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(() => {
-    const err = searchParams.get('error');
-    if (err === 'unauthorized') return 'This email is not authorized to access the system.';
+
+  const parseAuthError = () => {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+    const err = params.get('error') || hashParams.get('error');
+    const errDesc = params.get('error_description') || hashParams.get('error_description');
+    const rejectedEmail = params.get('email');
+
+    if (err === 'unauthorized') {
+      return rejectedEmail
+        ? `The email "${rejectedEmail}" is not authorized to access Fler. Please sign in with an authorized student organization email.`
+        : 'This email is not authorized to access the system.';
+    }
     if (err === 'db_error') return 'Database connection issue. Please try again later.';
+    if (errDesc) return decodeURIComponent(errDesc.replace(/\+/g, ' '));
+    if (err) return `Authentication error: ${err}`;
     return null;
-  });
+  };
+
+  const [error, setError] = useState<string | null>(parseAuthError);
 
   useEffect(() => {
-    const err = searchParams.get('error');
-    if (err === 'unauthorized') {
-      setError('This email is not authorized to access the system.');
-    } else if (err === 'db_error') {
-      setError('Database connection issue. Please try again later.');
+    const authErr = parseAuthError();
+    if (authErr) {
+      setError(authErr);
     }
   }, [searchParams]);
 
+  const anonKey =
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+  const isPlaceholderUrl =
+    import.meta.env.VITE_SUPABASE_URL?.includes('fler-db-app.supabase.co') ||
+    anonKey?.includes('demoKey');
+
   const handleGoogleLogin = async () => {
+    if (isPlaceholderUrl) {
+      setError(
+        'Invalid Supabase Configuration: Your .env file is using a placeholder domain (fler-db-app.supabase.co). Please update .env with your real Supabase Project URL and Anon Key from app.supabase.com.'
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -55,6 +83,17 @@ export const Auth = () => {
             <div className="mb-6 md:mb-8 p-4 bg-red-50 text-red-600 text-xs md:text-sm rounded-xl border border-red-100 flex items-start gap-3 animate-shake">
               <AlertCircle size={18} className="shrink-0 flex-shrink-0 mt-0.5" />
               <p className="font-medium text-left">{error}</p>
+            </div>
+          )}
+
+          {isPlaceholderUrl && (
+            <div className="mb-6 p-4 bg-amber-50 text-amber-800 text-xs md:text-sm rounded-xl border border-amber-200 text-left">
+              <p className="font-bold mb-1 flex items-center gap-1.5 text-amber-900">
+                ⚠️ Placeholder Supabase URL Detected
+              </p>
+              <p className="leading-relaxed">
+                Your <code>.env</code> file currently uses a dummy placeholder domain (<code>fler-db-app.supabase.co</code>). To make Google OAuth work, please update <code>.env</code> with your real Supabase Project URL & Anon Key from <a href="https://app.supabase.com" target="_blank" rel="noreferrer" className="underline font-semibold text-amber-900">app.supabase.com</a>.
+              </p>
             </div>
           )}
 

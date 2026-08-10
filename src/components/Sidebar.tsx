@@ -174,6 +174,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSide
               'hover:bg-white/10 text-gray-400 hover:text-white shrink-0',
               sidebarCollapsed ? 'w-10 h-10' : 'w-8 h-8'
             )}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <ChevronLeft

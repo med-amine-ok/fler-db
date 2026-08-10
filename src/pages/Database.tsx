@@ -9,6 +9,7 @@ import { Sheet } from '../components/ui/Sheet';
 import { supabase } from '../lib/supabase';
 import { SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { advancedMatch } from '../utils/search';
+import { useDebounce } from '../hooks/useDebounce';
 
 type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods' | 'Passages';
 
@@ -16,6 +17,7 @@ export const Database = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('Companies');
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -166,7 +168,7 @@ export const Database = () => {
   };
 
   const filteredData = data.filter(item => {
-    const matchesSearch = advancedMatch(item, searchTerm);
+    const matchesSearch = advancedMatch(item, debouncedSearchTerm);
     const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
     const matchesContactMethod = !selectedContactMethod || item.contact_method === selectedContactMethod;
     const matchesEvent = !selectedEvent || (item.event_id && String(item.event_id) === String(selectedEvent));
@@ -275,9 +277,9 @@ export const Database = () => {
               {item.status || 'Pending'}
             </Badge>
           </td>
-          <td className={clsx(cellClasses, "capitalize text-gray-400 text-xs")}>{item.contact_method || '-'}</td>
+          <td className={clsx(cellClasses, "capitalize text-gray-600 text-xs")}>{item.contact_method || '-'}</td>
           <td className={cellClasses}>
-            <p className="line-clamp-1 text-[11px] text-gray-400 italic" title={item.notes || ''}>
+            <p className="line-clamp-1 text-[11px] text-gray-600 italic" title={item.notes || ''}>
               {item.notes || '-'}
             </p>
           </td>
@@ -298,12 +300,14 @@ export const Database = () => {
                   <button
                     className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
                     onClick={() => handleEdit(item)}
+                    aria-label="Edit item"
                   >
                     <Edit2 size={14} />
                   </button>
                   <button
                     className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
                     onClick={() => setConfirmDeleteItem(item)}
+                    aria-label="Delete item"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -330,7 +334,7 @@ export const Database = () => {
             {item.status || 'Pending'}
           </Badge>
         </td>
-        <td className={clsx(cellClasses, "capitalize text-gray-400 text-xs")}>{item.type}</td>
+        <td className={clsx(cellClasses, "capitalize text-gray-600 text-xs")}>{item.type}</td>
         <td className={cellClasses}>
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-[9px] font-bold text-primary shrink-0">
@@ -348,12 +352,14 @@ export const Database = () => {
                 <button
                   className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
                   onClick={() => handleEdit(item)}
+                  aria-label="Edit item"
                 >
                   <Edit2 size={14} />
                 </button>
                 <button
                   className="p-1.5 text-red-400 hover:bg-red-50 rounded-md transition-colors"
                   onClick={() => setConfirmDeleteItem(item)}
+                  aria-label="Delete item"
                 >
                   <Trash2 size={14} />
                 </button>

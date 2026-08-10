@@ -31,6 +31,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { advancedMatch } from '../utils/search';
+import { useDebounce } from '../hooks/useDebounce';
 
 /* ─────────────────────── Types ─────────────────────── */
 
@@ -94,6 +95,7 @@ export const Secretary = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [filterTeam, setFilterTeam] = useState<string>('all');
     const [sortKey, setSortKey] = useState<SortKey>('totalContacts');
     const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -122,8 +124,8 @@ export const Secretary = () => {
     useEffect(() => {
         let result = [...members];
 
-        if (searchTerm) {
-            result = result.filter(m => advancedMatch(m, searchTerm));
+        if (debouncedSearchTerm) {
+            result = result.filter(m => advancedMatch(m, debouncedSearchTerm));
         }
 
         if (filterTeam !== 'all') {
@@ -143,7 +145,7 @@ export const Secretary = () => {
         });
 
         setFiltered(result);
-    }, [members, searchTerm, filterTeam, sortKey, sortDir]);
+    }, [members, debouncedSearchTerm, filterTeam, sortKey, sortDir]);
 
     const fetchData = async (isRefresh = false) => {
         try {

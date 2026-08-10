@@ -13,13 +13,49 @@ export const DashboardLayout = () => {
   const navigate = useNavigate();
   const pageTitle = location.pathname.split('/')[1] || 'Overview';
   const isHome = pageTitle.toLowerCase() === 'home' || pageTitle.toLowerCase() === 'overview';
+  
   const [userName, setUserName] = useState('User');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+
+  const messages = [
+    "The cave you fear to enter holds the treasure you seek",
+    "We are what we repeatedly do. Excellence, then, is not an act, but a habit",
+    "The master has failed more times than the beginner has even tried",
+    "He who has a why to live can bear almost any how",
+    "Do not judge each day by the harvest you reap, but by the seeds that you plant",
+    "In the depth of winter, I finally learned that within me there lay an invincible summer",
+    "It is during our darkest moments that we must focus to see the light",
+    "Knowing yourself is the beginning of all wisdom",
+    "What we achieve inwardly will change outer reality",
+    "Small daily improvements over time lead to stunning results",
+    "Discipline is choosing between what you want now and what you want most",
+    "Turn your wounds into wisdom",
+    "The secret of change is to focus all energy not on fighting the old, but on building the new",
+    "Rivers know this: there is no hurry. We shall get there someday",
+    "The obstacle in the path becomes the path. Within every difficulty lies opportunity",
+    "Clear mind, steadfast heart, relentless spirit",
+    "Your focus determines your reality. Direct it with intention",
+    "True mastery is not about overcoming others; it is about transcending your past self",
+    "Wisdom is knowing the right path to take; integrity is taking it",
+    "Believe in the power of compound effort. Consistency is the magic formula",
+    "Building strong partnerships is the bridge to our community's lasting success",
+    "Innovation distinguishes between a leader and a follower. Keep leading!",
+    "Teamwork transforms individual strength into collective triumph",
+    "Focus on being productive instead of busy. Quality outweighs quantity",
+    "The best way to predict your future is to create it today"
+  ];
 
   useEffect(() => {
     fetchUserProfile();
+
+    // Trigger random deep wisdom popup on initial entry
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    setNotificationMessage(randomMessage);
+    setIsNotificationOpen(true);
     
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -60,42 +96,7 @@ export const DashboardLayout = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // App.tsx will handle the redirect via onAuthStateChange
   };
-
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-
-
-  const messages = [
-    "Your hard work is paving the way for a brighter future. Keep it up! 🚀",
-    "Every small step counts. You're doing great! ✨",
-    "Thank you for your dedication to the team! We appreciate you. 💙",
-    "Success is the sum of small efforts, repeated day in and day out. 💪",
-    "The only way to do great work is to love what you do. ❤️",
-    "Believe you can and you're halfway there. 🌟",
-    "You are making a difference today! Keep shining. ☀️",
-    "Don't watch the clock; do what it does. Keep going. ⏰",
-    "Your positive attitude is contagious. Thank you! 😊",
-    "Great things never came from comfort zones. Push forward! 🔥",
-    "Building strong partnerships is the bridge to our community's success! 🤝",
-    "Our external relations team is the face of our mission. Shine on! 🌍",
-    "Sponsorships turn our dreams into reality. Great job securing that support! 💼",
-    "Strategic alliances are the foundation of our sustainable growth. 🏗️",
-    "Every new sponsor brings us closer to our goal. Keep pitching! 🎯",
-    "Nurturing relationships is at the heart of everything we do. ❤️",
-    "Innovation distinguishes between a leader and a follower. Keep leading! 💡",
-    "Teamwork makes the dream work! 🤝",
-    "Your contribution is invaluable to our growth. 📈",
-    "Keep your head high and your goals higher. 🏔️",
-    "Collaboration is the key to unlocking new opportunities. 🔑",
-    "Your energy and passion are what drive us forward. ⚡",
-    "Success is better when shared. Thank you for being a team player! 🏆",
-    "Persistence guarantees that results are inevitable. 🏁",
-    "Focus on being productive instead of busy. 🐝",
-    "The best way to predict the future is to create it. 🎨"
-  ];
-
 
   const handleBellClick = () => {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
@@ -110,15 +111,6 @@ export const DashboardLayout = () => {
         "flex-1 flex flex-col min-h-screen relative transition-all duration-300",
         sidebarCollapsed ? "md:ml-16" : "md:ml-72"
       )}>
-        {/* Background Watermark */}
-        {/* <div className={clsx(
-          "fixed inset-0 z-50 pointer-events-none flex items-center justify-center transition-all duration-300",
-          sidebarCollapsed ? "md:ml-16" : "md:ml-72"
-        )}>
-          <img src="/vic.png" className="block md:hidden w-[500px] opacity-[0.2]" alt="" />
-          <img src="/vic_long.png" className="hidden md:block w-[1000px] opacity-[0.2]" alt="" />
-        </div> */}
-
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
           <div className="flex items-center gap-4">
@@ -172,6 +164,7 @@ export const DashboardLayout = () => {
             <button
               onClick={handleBellClick}
               className="relative p-2.5 bg-white rounded-full shadow-sm hover:shadow-md text-gray-500 hover:text-primary transition-all"
+              aria-label="View daily wisdom"
             >
               <Bell size={20} />
               <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
@@ -203,7 +196,7 @@ export const DashboardLayout = () => {
       <Modal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
-        title="FLER 2026"
+        title="Daily Wisdom"
         size="md"
       >
         <div className="flex flex-col items-center justify-center py-8 px-6">
@@ -226,16 +219,7 @@ export const DashboardLayout = () => {
             <Quote className="absolute -bottom-6 -right-2 w-8 h-8 text-primary/10" />
           </div>
 
-          {/* Button */}
-          <button
-            onClick={() => setIsNotificationOpen(false)}
-            className="group relative px-8 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-full font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden w-full sm:w-auto"
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2 text-base tracking-wide">
-              Thanks! <Heart className="w-5 h-5 fill-current animate-pulse text-red-400" />
-            </span>
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          </button>
+         
         </div>
       </Modal>
     </div>

@@ -1,26 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { Loader2 } from 'lucide-react';
 import { supabase } from './lib/supabase';
-import { Auth } from './pages/Auth';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import { Home } from './pages/Home';
-import { Events } from './pages/Events';
-import { EventDossier } from './pages/EventDossier';
-import { Teams } from './pages/Teams';
-import { TeamReport } from './pages/TeamReport';
-import { Database } from './pages/Database';
-import { Profile } from './pages/Profile';
-import { LogisticsDashboard } from './pages/logistics/LogisticsDashboard';
-import { LogisticsForm } from './pages/logistics/LogisticsForm';
-import { SponsoringEvents } from './pages/sponsoring/SponsoringEvents';
-import { SponsoringDashboard } from './pages/sponsoring/SponsoringDashboard';
-import { SponsoringForm } from './pages/sponsoring/SponsoringForm';
-import { DatabaseForm } from './pages/DatabaseForm';
-import { SuperAdmin } from './pages/SuperAdmin';
-import { Secretary } from './pages/Secretary';
 import { ALLOWED_EMAILS, SUPER_ADMIN_EMAIL, SECRETARY_EMAILS } from './lib/constants';
+
+// Lazy-loaded page components for route-level code splitting
+const Auth = lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
+const Events = lazy(() => import('./pages/Events').then(m => ({ default: m.Events })));
+const EventDossier = lazy(() => import('./pages/EventDossier').then(m => ({ default: m.EventDossier })));
+const Teams = lazy(() => import('./pages/Teams').then(m => ({ default: m.Teams })));
+const TeamReport = lazy(() => import('./pages/TeamReport').then(m => ({ default: m.TeamReport })));
+const Database = lazy(() => import('./pages/Database').then(m => ({ default: m.Database })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const LogisticsDashboard = lazy(() => import('./pages/logistics/LogisticsDashboard').then(m => ({ default: m.LogisticsDashboard })));
+const LogisticsForm = lazy(() => import('./pages/logistics/LogisticsForm').then(m => ({ default: m.LogisticsForm })));
+const SponsoringEvents = lazy(() => import('./pages/sponsoring/SponsoringEvents').then(m => ({ default: m.SponsoringEvents })));
+const SponsoringDashboard = lazy(() => import('./pages/sponsoring/SponsoringDashboard').then(m => ({ default: m.SponsoringDashboard })));
+const SponsoringForm = lazy(() => import('./pages/sponsoring/SponsoringForm').then(m => ({ default: m.SponsoringForm })));
+const DatabaseForm = lazy(() => import('./pages/DatabaseForm').then(m => ({ default: m.DatabaseForm })));
+const SuperAdmin = lazy(() => import('./pages/SuperAdmin').then(m => ({ default: m.SuperAdmin })));
+const Secretary = lazy(() => import('./pages/Secretary').then(m => ({ default: m.Secretary })));
 
 const createProfileIfNeeded = async (user: any): Promise<{ success: boolean; error?: string }> => {
   try {
@@ -190,49 +192,55 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={session ? <Navigate to="/home" replace /> : <Auth />} />
+      <Suspense fallback={
+        <div className="h-screen w-full flex items-center justify-center">
+          <Loader2 className="animate-spin text-primary" size={40} />
+        </div>
+      }>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={session ? <Navigate to="/home" replace /> : <Auth />} />
 
-        {/* Protected Dashboard Routes */}
-        <Route element={
-          <ProtectedRoute session={session}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }>
-          <Route path="/home" element={<Home />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/events/:id/dossier" element={<EventDossier />} />
-          <Route path="/teams" element={<Teams />} />
-          <Route path="/teams/:id/report" element={<TeamReport />} />
+          {/* Protected Dashboard Routes */}
+          <Route element={
+            <ProtectedRoute session={session}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }>
+            <Route path="/home" element={<Home />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/events/:id/dossier" element={<EventDossier />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/teams/:id/report" element={<TeamReport />} />
 
-          {/* Logistics Routes */}
-          <Route path="/teams/logistics" element={<LogisticsDashboard />} />
-          <Route path="/teams/logistics/add" element={<LogisticsForm />} />
+            {/* Logistics Routes */}
+            <Route path="/teams/logistics" element={<LogisticsDashboard />} />
+            <Route path="/teams/logistics/add" element={<LogisticsForm />} />
 
-          {/* Sponsoring Routes */}
-          <Route path="/teams/sponsoring" element={<SponsoringEvents />} />
-          <Route path="/teams/sponsoring/:eventId" element={<SponsoringDashboard />} />
-          <Route path="/teams/sponsoring/:eventId/add" element={<SponsoringForm />} />
+            {/* Sponsoring Routes */}
+            <Route path="/teams/sponsoring" element={<SponsoringEvents />} />
+            <Route path="/teams/sponsoring/:eventId" element={<SponsoringDashboard />} />
+            <Route path="/teams/sponsoring/:eventId/add" element={<SponsoringForm />} />
 
-          <Route path="/database" element={<Database />} />
-          <Route path="/database/add" element={<DatabaseForm />} />
-          <Route path="/profile" element={<Profile />} />
+            <Route path="/database" element={<Database />} />
+            <Route path="/database/add" element={<DatabaseForm />} />
+            <Route path="/profile" element={<Profile />} />
 
-          {/* Secretary Route */}
-          {SECRETARY_EMAILS.includes(session?.user?.email?.toLowerCase() || '') && (
-            <Route path="/secretary" element={<Secretary />} />
-          )}
+            {/* Secretary Route */}
+            {SECRETARY_EMAILS.includes(session?.user?.email?.toLowerCase() || '') && (
+              <Route path="/secretary" element={<Secretary />} />
+            )}
 
-          {/* Super Admin Route */}
-          {session?.user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL && (
-            <Route path="/super-admin" element={<SuperAdmin />} />
-          )}
-        </Route>
+            {/* Super Admin Route */}
+            {session?.user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL && (
+              <Route path="/super-admin" element={<SuperAdmin />} />
+            )}
+          </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

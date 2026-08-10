@@ -191,7 +191,7 @@ export const Home = () => {
           </div>
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Partnerships</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Contacts</p>
               <h3 className="text-3xl md:text-4xl font-black mt-2 text-text tracking-tighter">{stats.contactCount}</h3>
               
             </div>

@@ -52,10 +52,14 @@ export const DashboardLayout = () => {
   useEffect(() => {
     fetchUserProfile();
 
-    // Trigger random deep wisdom popup on initial entry
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    setNotificationMessage(randomMessage);
-    setIsNotificationOpen(true);
+    // Trigger random deep wisdom popup ONLY on the first entry of the session
+    const hasSeenWisdom = sessionStorage.getItem('fler_wisdom_shown');
+    if (!hasSeenWisdom) {
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      setNotificationMessage(randomMessage);
+      setIsNotificationOpen(true);
+      sessionStorage.setItem('fler_wisdom_shown', 'true');
+    }
     
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {

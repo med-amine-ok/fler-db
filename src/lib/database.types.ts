@@ -1,174 +1,228 @@
 export type Json =
-    | string
-    | number
-    | boolean
-    | null
-    | { [key: string]: Json | undefined }
-    | Json[]
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export interface Database {
-    public: {
-        Tables: {
-            profiles: {
-                Row: {
-                    id: string
-                    full_name: string | null
-                    email: string | null
-                    phone_number: string | null
-                    team: 'logistics' | 'sponsoring' | 'both' | null
-                    created_at: string
-                    ranking: number | null
-                }
-                Insert: {
-                    id: string
-                    full_name?: string | null
-                    email?: string | null
-                    phone_number?: string | null
-                    team?: 'logistics' | 'sponsoring' | 'both' | null
-                    created_at?: string
-                    ranking?: number | null
-                }
-                Update: {
-                    id?: string
-                    full_name?: string | null
-                    email?: string | null
-                    phone_number?: string | null
-                    team?: 'logistics' | 'sponsoring' | 'both' | null
-                    created_at?: string
-                    ranking?: number | null
-                }
-            }
-            events: {
-                Row: {
-                    id: number
-                    name: string
-                    status: 'planned' | 'ongoing' | 'finished' | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: number
-                    name: string
-                    status?: 'planned' | 'ongoing' | 'finished' | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: number
-                    name?: string
-                    status?: 'planned' | 'ongoing' | 'finished' | null
-                    created_at?: string
-                }
-            }
-            companies: {
-                Row: {
-                    id: number
-                    name: string
-                    status: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id: string | null
-                    notes: string | null
-                    contact: string | null
-                    event_id: number | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: number
-                    name: string
-                    status?: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id?: string | null
-                    notes?: string | null
-                    contact?: string | null
-                    event_id?: number | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: number
-                    name?: string
-                    status?: 'contacted' | 'pending' | 'signed' | 'rejected' | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id?: string | null
-                    notes?: string | null
-                    contact?: string | null
-                    event_id?: number | null
-                    created_at?: string
-                }
-            }
-            logistics: {
-                Row: {
-                    id: number
-                    name: string
-                    type: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
-                    status: string | null
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id: string | null
-                    notes: string | null
-                    contact: string | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: number
-                    name: string
-                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
-                    status?: string | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id?: string | null
-                    notes?: string | null
-                    contact?: string | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: number
-                    name?: string
-                    type?: 'hotel' | 'salle' | 'food' | 'goodies' | 'passage' | null
-                    status?: string | null
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    assigned_user_id?: string | null
-                    notes?: string | null
-                    contact?: string | null
-                    created_at?: string
-                }
-            }
-            activities: {
-                Row: {
-                    id: number
-                    user_id: string | null
-                    source: 'company' | 'logistics' | null
-                    source_id: number
-                    contact_method: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    created_at: string
-                }
-                Insert: {
-                    id?: number
-                    user_id?: string | null
-                    source?: 'company' | 'logistics' | null
-                    source_id: number
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    created_at?: string
-                }
-                Update: {
-                    id?: number
-                    user_id?: string | null
-                    source?: 'company' | 'logistics' | null
-                    source_id?: number
-                    contact_method?: 'call' | 'email' | 'linkedin' | 'outing' | 'social_media' | null
-                    created_at?: string
-                }
-            }
-            user_rankings: {
-                Row: {
-                    id: string
-                    full_name: string | null
-                    email: string | null
-                    team: 'logistics' | 'sponsoring' | 'both' | null
-                    total_points: number
-                    total_activities: number
-                    call_count: number
-                    email_count: number
-                    linkedin_count: number
-                    outing_count: number
-                    rank: number
-                }
-            }
-        }
-    }
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          full_name: string | null;
+          email: string | null;
+          phone_number: string | null;
+          team: "logistics" | "sponsoring" | "both" | null;
+          created_at: string;
+          ranking: number | null;
+        };
+        Insert: {
+          id: string;
+          full_name?: string | null;
+          email?: string | null;
+          phone_number?: string | null;
+          team?: "logistics" | "sponsoring" | "both" | null;
+          created_at?: string;
+          ranking?: number | null;
+        };
+        Update: {
+          id?: string;
+          full_name?: string | null;
+          email?: string | null;
+          phone_number?: string | null;
+          team?: "logistics" | "sponsoring" | "both" | null;
+          created_at?: string;
+          ranking?: number | null;
+        };
+      };
+      events: {
+        Row: {
+          id: number;
+          name: string;
+          status: "planned" | "ongoing" | "finished" | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          status?: "planned" | "ongoing" | "finished" | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          status?: "planned" | "ongoing" | "finished" | null;
+          created_at?: string;
+        };
+      };
+      companies: {
+        Row: {
+          id: number;
+          name: string;
+          status: "contacted" | "pending" | "signed" | "rejected" | null;
+          contact_method:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id: string | null;
+          notes: string | null;
+          contact: string | null;
+          event_id: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          status?: "contacted" | "pending" | "signed" | "rejected" | null;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id?: string | null;
+          notes?: string | null;
+          contact?: string | null;
+          event_id?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          status?: "contacted" | "pending" | "signed" | "rejected" | null;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id?: string | null;
+          notes?: string | null;
+          contact?: string | null;
+          event_id?: number | null;
+          created_at?: string;
+        };
+      };
+      logistics: {
+        Row: {
+          id: number;
+          name: string;
+          type: "hotel" | "salle" | "food" | "goodies" | "passage" | null;
+          status: string | null;
+          contact_method:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id: string | null;
+          notes: string | null;
+          contact: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          type?: "hotel" | "salle" | "food" | "goodies" | "passage" | null;
+          status?: string | null;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id?: string | null;
+          notes?: string | null;
+          contact?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          type?: "hotel" | "salle" | "food" | "goodies" | "passage" | null;
+          status?: string | null;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          assigned_user_id?: string | null;
+          notes?: string | null;
+          contact?: string | null;
+          created_at?: string;
+        };
+      };
+      activities: {
+        Row: {
+          id: number;
+          user_id: string | null;
+          source: "company" | "logistics" | null;
+          source_id: number;
+          contact_method:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id?: string | null;
+          source?: "company" | "logistics" | null;
+          source_id: number;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: string | null;
+          source?: "company" | "logistics" | null;
+          source_id?: number;
+          contact_method?:
+            | "call"
+            | "email"
+            | "linkedin"
+            | "outing"
+            | "social_media"
+            | null;
+          created_at?: string;
+        };
+      };
+      user_rankings: {
+        Row: {
+          id: string;
+          full_name: string | null;
+          email: string | null;
+          team: "logistics" | "sponsoring" | "both" | null;
+          total_points: number;
+          total_activities: number;
+          call_count: number;
+          email_count: number;
+          linkedin_count: number;
+          outing_count: number;
+          rank: number;
+        };
+      };
+    };
+  };
 }

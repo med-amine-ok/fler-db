@@ -1,25 +1,27 @@
-import { Sidebar } from '../components/Sidebar';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, Quote, Sparkles, Search } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { clsx } from 'clsx';
-import { supabase } from '../lib/supabase';
-import { Modal } from '../components/ui/Modal';
-import { CommandPalette } from '../components/CommandPalette';
-import { BottomNav } from '../components/BottomNav';
+import { Sidebar } from "../components/Sidebar";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Bell, LogOut, Quote, Sparkles, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { clsx } from "clsx";
+import { supabase } from "../lib/supabase";
+import { Modal } from "../components/ui/Modal";
+import { CommandPalette } from "../components/CommandPalette";
+import { BottomNav } from "../components/BottomNav";
 
 export const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const pageTitle = location.pathname.split('/')[1] || 'Overview';
-  const isHome = pageTitle.toLowerCase() === 'home' || pageTitle.toLowerCase() === 'overview';
-  
-  const [userName, setUserName] = useState('User');
+  const pageTitle = location.pathname.split("/")[1] || "Overview";
+  const isHome =
+    pageTitle.toLowerCase() === "home" ||
+    pageTitle.toLowerCase() === "overview";
+
+  const [userName, setUserName] = useState("User");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   const messages = [
     "The cave you fear to enter holds the treasure you seek",
@@ -84,54 +86,57 @@ export const DashboardLayout = () => {
     "And whoever relies upon Allah, He is sufficient for him. Qur’an 65:3",
     "What is meant for you will never miss you",
     "Trust Allah’s timing. What feels like a delay may be divine preparation",
-    "Do not lose hope in the mercy of Allah. Qur’an 39:53"
+    "Do not lose hope in the mercy of Allah. Qur’an 39:53",
   ];
 
   useEffect(() => {
     fetchUserProfile();
 
     // Trigger random deep wisdom popup ONLY on the first entry of the session
-    const hasSeenWisdom = sessionStorage.getItem('fler_wisdom_shown');
+    const hasSeenWisdom = sessionStorage.getItem("fler_wisdom_shown");
     if (!hasSeenWisdom) {
-      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      const randomMessage =
+        messages[Math.floor(Math.random() * messages.length)];
       setNotificationMessage(randomMessage);
       setIsNotificationOpen(true);
-      sessionStorage.setItem('fler_wisdom_shown', 'true');
+      sessionStorage.setItem("fler_wisdom_shown", "true");
     }
-    
+
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        setIsCommandPaletteOpen(prev => !prev);
+        setIsCommandPaletteOpen((prev) => !prev);
       }
-      
+
       // Alt + number shortcuts
-      if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
+      if (e.altKey && ["1", "2", "3", "4", "5"].includes(e.key)) {
         e.preventDefault();
-        const routes = ['/home', '/database', '/events', '/teams', '/profile'];
+        const routes = ["/home", "/database", "/events", "/teams", "/profile"];
         const index = parseInt(e.key) - 1;
         if (routes[index]) {
           navigate(routes[index]);
         }
       }
     };
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [navigate]);
 
   const fetchUserProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
         .single();
 
       if ((profile as any)?.full_name) {
         setUserName((profile as any).full_name);
       } else {
-        setUserName(user.email?.split('@')[0] || 'User');
+        setUserName(user.email?.split("@")[0] || "User");
       }
     }
   };
@@ -148,11 +153,18 @@ export const DashboardLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-background font-sans">
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-      <main className={clsx(
-        "flex-1 flex flex-col min-h-screen relative transition-all duration-300",
-        sidebarCollapsed ? "md:ml-16" : "md:ml-72"
-      )}>
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        sidebarCollapsed={sidebarCollapsed}
+        setSidebarCollapsed={setSidebarCollapsed}
+      />
+      <main
+        className={clsx(
+          "flex-1 flex flex-col min-h-screen relative transition-all duration-300",
+          sidebarCollapsed ? "md:ml-16" : "md:ml-72",
+        )}
+      >
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex items-center justify-between border-b border-gray-200/50">
           <div className="flex items-center gap-4">
@@ -162,28 +174,34 @@ export const DashboardLayout = () => {
               className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px] p-1 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors relative"
               aria-label="Toggle menu"
             >
-              <span className={clsx(
-                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
-                sidebarOpen ? "w-5 rotate-45 translate-y-[7px]" : "w-6"
-              )} />
-              <span className={clsx(
-                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300",
-                sidebarOpen ? "w-0 opacity-0" : "w-5 opacity-100"
-              )} />
-              <span className={clsx(
-                "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
-                sidebarOpen ? "w-5 -rotate-45 -translate-y-[7px]" : "w-6"
-              )} />
+              <span
+                className={clsx(
+                  "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
+                  sidebarOpen ? "w-5 rotate-45 translate-y-[7px]" : "w-6",
+                )}
+              />
+              <span
+                className={clsx(
+                  "block h-0.5 bg-gray-700 rounded-full transition-all duration-300",
+                  sidebarOpen ? "w-0 opacity-0" : "w-5 opacity-100",
+                )}
+              />
+              <span
+                className={clsx(
+                  "block h-0.5 bg-gray-700 rounded-full transition-all duration-300 origin-center",
+                  sidebarOpen ? "w-5 -rotate-45 -translate-y-[7px]" : "w-6",
+                )}
+              />
             </button>
             <h2 className="text-lg md:text-xl font-bold text-text capitalize tracking-tight line-clamp-2">
               {isHome ? (
                 <span className="bg-gradient-to-r from-text to-gray-500 bg-clip-text text-transparent">
-                  Welcome back, {userName.split(' ')[0]}
+                  Welcome back, {userName.split(" ")[0]}
                 </span>
               ) : (
                 <>
-                  {pageTitle.replace('-', ' ')}
-                  {location.pathname.includes('database') && ' Database'}
+                  {pageTitle.replace("-", " ")}
+                  {location.pathname.includes("database") && " Database"}
                 </>
               )}
             </h2>
@@ -230,7 +248,7 @@ export const DashboardLayout = () => {
 
       <BottomNav />
 
-      <CommandPalette 
+      <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
       />
@@ -259,7 +277,7 @@ export const DashboardLayout = () => {
             </p>
 
             <Quote className="absolute -bottom-6 -right-2 w-8 h-8 text-primary/10" />
-          </div> 
+          </div>
         </div>
       </Modal>
     </div>

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, AlertCircle } from 'lucide-react';
-import { ALLOWED_EMAILS } from '../lib/constants';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, AlertCircle } from "lucide-react";
+import { ALLOWED_EMAILS } from "../lib/constants";
 
 export const Landing = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -13,11 +13,11 @@ export const Landing = () => {
     setError(null);
 
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     if (ALLOWED_EMAILS.includes(normalizedEmail)) {
-      navigate('/auth', { state: { email: normalizedEmail } });
+      navigate("/auth", { state: { email: normalizedEmail } });
     } else {
-      setError('Sorry, this email is not authorized to access the system.');
+      setError("Sorry, this email is not authorized to access the system.");
     }
   };
 
@@ -40,7 +40,10 @@ export const Landing = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
           <div className="text-left">
-            <label htmlFor="email" className="block text-xs md:text-sm font-semibold text-gray-700 mb-2 md:mb-3 uppercase tracking-wider">
+            <label
+              htmlFor="email"
+              className="block text-xs md:text-sm font-semibold text-gray-700 mb-2 md:mb-3 uppercase tracking-wider"
+            >
               Email Address
             </label>
             <input
@@ -56,7 +59,7 @@ export const Landing = () => {
               }}
             />
           </div>
-          
+
           <button
             type="submit"
             className="w-full py-3 md:py-3.5 px-6 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg md:rounded-xl font-semibold hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/30 text-sm md:text-base"

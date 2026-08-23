@@ -13,11 +13,14 @@ import { useDebounce } from '../hooks/useDebounce';
 
 type Tab = 'Companies' | 'Hotels' | 'Goodies' | 'Foods' | 'Passages';
 
+const ITEMS_PER_PAGE = 30;
+
 export const Database = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('Companies');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -29,19 +32,30 @@ export const Database = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [userFilterSearch, setUserFilterSearch] = useState('');
   const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<any>(null);
 
-  const hasActiveFilters = Boolean(selectedUser || selectedEvent || selectedContactMethod);
+  const hasActiveFilters = Boolean(selectedUsers.length > 0 || selectedEvent || selectedContactMethod);
 
   const resetFilters = () => {
-    setSelectedUser(null);
+    setSelectedUsers([]);
+    setUserFilterSearch('');
     setSelectedEvent(null);
     setSelectedContactMethod(null);
     setSortBy('newest');
+    setCurrentPage(1);
+  };
+
+  const toggleUser = (userId: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
   };
 
   const tabs: Tab[] = ['Companies', 'Hotels', 'Goodies', 'Foods', 'Passages'];
@@ -169,7 +183,10 @@ export const Database = () => {
 
   const filteredData = data.filter(item => {
     const matchesSearch = advancedMatch(item, debouncedSearchTerm);
-    const matchesUser = !selectedUser || item.assigned_user_id === selectedUser;
+    const matchesUser =
+      selectedUsers.length === 0 ||
+      (selectedUsers.includes('unassigned') && !item.assigned_user_id) ||
+      (item.assigned_user_id && selectedUsers.includes(item.assigned_user_id));
     const matchesContactMethod = !selectedContactMethod || item.contact_method === selectedContactMethod;
     const matchesEvent = !selectedEvent || (item.event_id && String(item.event_id) === String(selectedEvent));
     return matchesSearch && matchesUser && matchesContactMethod && matchesEvent;
@@ -192,6 +209,16 @@ export const Database = () => {
         return 0;
     }
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, debouncedSearchTerm, selectedUsers, selectedEvent, selectedContactMethod, sortBy]);
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length);
+  const paginatedData = filteredData.slice(startIndex, endIndex);
 
   const handleAdd = () => {
     // Redirect to specific add forms based on tab
@@ -257,7 +284,7 @@ export const Database = () => {
     const cellClasses = "py-4 px-3 md:px-6 text-sm text-gray-600 transition-colors truncate";
 
     if (activeTab === 'Companies') {
-      return (filteredData as any[]).map((item) => (
+      return (paginatedData as any[]).map((item) => (
         <tr key={item.id} className={rowClasses}>
           <td className={clsx(cellClasses, "font-semibold text-gray-900")}>
             <div className="flex flex-col min-w-0">
@@ -322,7 +349,7 @@ export const Database = () => {
     }
 
     // Logistics
-    return (filteredData as any[]).map((item) => (
+    return (paginatedData as any[]).map((item) => (
       <tr key={item.id} className={rowClasses}>
         <td className={clsx(cellClasses, "font-semibold text-gray-900")}>{item.name}</td>
         <td className={cellClasses}>
@@ -387,7 +414,7 @@ export const Database = () => {
       );
     }
 
-    return (filteredData as any[]).map((item) => (
+    return (paginatedData as any[]).map((item) => (
       <Card key={item.id} className="p-4 flex flex-col gap-3 group border-0 shadow-sm hover:shadow-md transition-all rounded-xl">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -545,12 +572,41 @@ export const Database = () => {
           {renderMobileCards()}
         </div>
 
-        {/* Pagination (Desktop Only for now) */}
-        <div className="hidden md:flex p-3 md:p-4 border-t border-gray-100 flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-0 bg-gray-50/30">
-          <span className="text-xs md:text-sm text-gray-500 font-medium">Showing <span className="text-text">{filteredData.length > 0 ? 1 : 0}-{filteredData.length > 10 ? 10 : filteredData.length}</span> of <span className="text-text">{filteredData.length}</span></span>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" size="sm" disabled className="flex-1 sm:flex-none text-xs md:text-sm rounded-lg">Prev</Button>
-            <Button variant="outline" size="sm" disabled className="flex-1 sm:flex-none text-xs md:text-sm rounded-lg">Next</Button>
+        {/* Pagination */}
+        <div className="flex p-3 md:p-4 border-t border-gray-100 flex-col sm:flex-row justify-between items-center gap-3 bg-gray-50/50">
+          <span className="text-xs md:text-sm text-gray-500 font-medium text-center sm:text-left">
+            Showing <span className="text-text font-semibold">{filteredData.length > 0 ? startIndex + 1 : 0}</span>-
+            <span className="text-text font-semibold">{endIndex}</span> of <span className="text-text font-semibold">{filteredData.length}</span> records
+          </span>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <span className="text-xs text-gray-500 mr-2 hidden sm:inline">
+              Page <span className="font-semibold text-gray-700">{safePage}</span> of <span className="font-semibold text-gray-700">{totalPages}</span>
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage <= 1}
+              onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+              className="flex-1 sm:flex-none text-xs md:text-sm rounded-lg"
+            >
+              Prev
+            </Button>
+
+            <span className="text-xs text-gray-600 font-medium sm:hidden">
+              {safePage} / {totalPages}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage >= totalPages}
+              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+              className="flex-1 sm:flex-none text-xs md:text-sm rounded-lg"
+            >
+              Next
+            </Button>
           </div>
         </div>
       </Card>
@@ -618,17 +674,95 @@ export const Database = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by User</label>
-            <select
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 outline-none focus:border-primary bg-white text-sm"
-              value={selectedUser || ''}
-              onChange={(e) => setSelectedUser(e.target.value || null)}
-            >
-              <option value="">All Users</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>{user.full_name}</option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700">Filter by User</label>
+              {selectedUsers.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedUsers([])}
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  Clear ({selectedUsers.length})
+                </button>
+              )}
+            </div>
+
+            <div className="relative mb-2">
+              <Search className="absolute left-2.5 top-2.5 text-gray-400 w-3.5 h-3.5" />
+              <input
+                type="text"
+                placeholder="Search user name..."
+                value={userFilterSearch}
+                onChange={(e) => setUserFilterSearch(e.target.value)}
+                className="w-full pl-8 pr-7 py-1.5 rounded-lg border border-gray-200 focus:border-primary outline-none text-xs transition-all bg-white"
+              />
+              {userFilterSearch && (
+                <button
+                  type="button"
+                  onClick={() => setUserFilterSearch('')}
+                  className="absolute right-2.5 top-2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+              {users
+                .filter(u => (u.full_name || '').toLowerCase().includes(userFilterSearch.toLowerCase()))
+                .map(user => {
+                  const isSelected = selectedUsers.includes(user.id);
+                  return (
+                    <label
+                      key={user.id}
+                      className={clsx(
+                        "flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all text-sm select-none",
+                        isSelected
+                          ? "bg-primary/5 border-primary/40 text-gray-900 font-medium"
+                          : "bg-white border-gray-100 hover:bg-gray-50 text-gray-700"
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleUser(user.id)}
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                      />
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                        {(user.full_name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate flex-1 text-xs">{user.full_name}</span>
+                    </label>
+                  );
+                })}
+
+              {('unassigned'.includes(userFilterSearch.toLowerCase()) || !userFilterSearch) && (
+                <label
+                  className={clsx(
+                    "flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer transition-all text-sm select-none",
+                    selectedUsers.includes('unassigned')
+                      ? "bg-primary/5 border-primary/40 text-gray-900 font-medium"
+                      : "bg-white border-gray-100 hover:bg-gray-50 text-gray-700"
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes('unassigned')}
+                    onChange={() => toggleUser('unassigned')}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                  />
+                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500 shrink-0">
+                    U
+                  </div>
+                  <span className="truncate flex-1 text-xs text-gray-500 italic">Unassigned</span>
+                </label>
+              )}
+
+              {users.filter(u => (u.full_name || '').toLowerCase().includes(userFilterSearch.toLowerCase())).length === 0 &&
+                !('unassigned'.includes(userFilterSearch.toLowerCase())) && (
+                  <p className="text-center py-4 text-xs text-gray-400">No users found</p>
+              )}
+            </div>
           </div>
 
           {activeTab === 'Companies' && (

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Copy, Download, Check, Loader2, Calendar, Target, 
-  Plus, ClipboardCheck, AlertCircle, Filter, Hotel, Home, Coffee, Gift, Truck, CircleDot
+  Plus, ClipboardCheck, AlertCircle, Filter, Hotel, Home, Coffee, Gift, Truck, CircleDot,
+  Search, X, Phone, Mail, Globe, Users, Building2
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -27,6 +28,18 @@ export const EventDossier = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [logisticsTypeFilter, setLogisticsTypeFilter] = useState<string>('all');
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
+  // Sponsorship table filters & pagination
+  const [sponsorSearch, setSponsorSearch] = useState('');
+  const [sponsorStatusFilter, setSponsorStatusFilter] = useState<string>('all');
+  const [sponsorMethodFilter, setSponsorMethodFilter] = useState<string>('all');
+  const [sponsorManagerFilter, setSponsorManagerFilter] = useState<string>('all');
+  const [sponsorPage, setSponsorPage] = useState(1);
+  const SPONSOR_ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setSponsorPage(1);
+  }, [sponsorSearch, sponsorStatusFilter, sponsorMethodFilter, sponsorManagerFilter]);
 
   useEffect(() => {
     if (id) {
@@ -435,73 +448,294 @@ Cordialement,`,
         )}
 
         {/* TAB 2: SPONSORSHIP */}
-        {activeTab === 'sponsoring' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center flex-wrap gap-4">
-              <div>
-                <h3 className="font-bold text-lg text-text">Sponsorship Pipeline</h3>
-                <p className="text-xs text-gray-400">List of partners and companies currently targetted for this event.</p>
+        {activeTab === 'sponsoring' && (() => {
+          const uniqueManagers = Array.from(new Set(companies.map(c => c.assignedTo).filter(Boolean)));
+
+          const filteredCompanies = companies.filter(company => {
+            const q = sponsorSearch.toLowerCase().trim();
+            const matchesSearch = !q ||
+              (company.name && company.name.toLowerCase().includes(q)) ||
+              (company.assignedTo && company.assignedTo.toLowerCase().includes(q)) ||
+              (company.notes && company.notes.toLowerCase().includes(q));
+
+            const matchesStatus = sponsorStatusFilter === 'all' || company.status === sponsorStatusFilter;
+            const matchesMethod = sponsorMethodFilter === 'all' || (company.contactMethod && company.contactMethod.toLowerCase() === sponsorMethodFilter.toLowerCase());
+            const matchesManager = sponsorManagerFilter === 'all' || company.assignedTo === sponsorManagerFilter;
+
+            return matchesSearch && matchesStatus && matchesMethod && matchesManager;
+          });
+
+          const sponsorTotalPages = Math.ceil(filteredCompanies.length / SPONSOR_ITEMS_PER_PAGE) || 1;
+          const safeSponsorPage = Math.min(Math.max(sponsorPage, 1), sponsorTotalPages);
+          const sponsorStartIndex = (safeSponsorPage - 1) * SPONSOR_ITEMS_PER_PAGE;
+          const sponsorEndIndex = Math.min(sponsorStartIndex + SPONSOR_ITEMS_PER_PAGE, filteredCompanies.length);
+          const paginatedCompanies = filteredCompanies.slice(sponsorStartIndex, sponsorEndIndex);
+
+          const getContactMethodBadge = (method?: string) => {
+            const m = method?.toLowerCase();
+            switch (m) {
+              case 'call':
+                return <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md"><Phone size={11} /> Call</span>;
+              case 'email':
+                return <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md"><Mail size={11} /> Email</span>;
+              case 'linkedin':
+                return <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md"><Globe size={11} /> LinkedIn</span>;
+              case 'social_media':
+                return <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md"><Globe size={11} /> Social Media</span>;
+              case 'outing':
+                return <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md"><Users size={11} /> Outing</span>;
+              default:
+                return <span className="text-xs text-gray-500 capitalize">{method || 'Email'}</span>;
+            }
+          };
+
+          const hasActiveFilters = Boolean(
+            sponsorSearch || sponsorStatusFilter !== 'all' || sponsorMethodFilter !== 'all' || sponsorManagerFilter !== 'all'
+          );
+
+          return (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                  <h3 className="font-bold text-lg text-text">Sponsorship Pipeline</h3>
+                  <p className="text-xs text-gray-400">List of partners and companies currently targetted for this event.</p>
+                </div>
+                <Button size="sm" onClick={() => navigate('/teams/sponsoring/1/add')}>
+                  <Plus size={14} className="mr-1" /> Add Partner Contract
+                </Button>
               </div>
-              <Button size="sm" onClick={() => navigate('/teams/sponsoring/1/add')}>
-                <Plus size={14} className="mr-1" /> Add Partner Contract
-              </Button>
-            </div>
 
-            {/* Visual Funnel */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {(['contacted', 'pending', 'signed', 'rejected'] as const).map(stage => {
-                const count = companies.filter(c => c.status === stage).length;
-                return (
-                  <Card key={stage} className="p-4 border-0 shadow-md rounded-2xl bg-white text-center space-y-1">
-                    <span className="text-xs font-semibold text-gray-400 uppercase">{stage}</span>
-                    <h4 className="text-2xl font-black text-text">{count}</h4>
-                  </Card>
-                );
-              })}
-            </div>
+              {/* Visual Funnel Cards (Clickable Filter) */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                {(['contacted', 'pending', 'signed', 'rejected'] as const).map(stage => {
+                  const count = companies.filter(c => c.status === stage).length;
+                  const isSelected = sponsorStatusFilter === stage;
+                  return (
+                    <button
+                      key={stage}
+                      type="button"
+                      onClick={() => setSponsorStatusFilter(isSelected ? 'all' : stage)}
+                      className={clsx(
+                        "p-4 border text-left rounded-2xl transition-all cursor-pointer select-none relative overflow-hidden group",
+                        isSelected
+                          ? "bg-primary/[0.04] border-primary shadow-sm ring-2 ring-primary/20 scale-[1.01]"
+                          : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={clsx(
+                          "text-[11px] font-bold uppercase tracking-wider",
+                          isSelected ? "text-primary" : "text-gray-400"
+                        )}>
+                          {stage}
+                        </span>
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                      <h4 className={clsx(
+                        "text-2xl font-black mt-1",
+                        stage === 'signed' ? "text-emerald-600" :
+                        stage === 'rejected' ? "text-rose-500" :
+                        stage === 'pending' ? "text-amber-500" : "text-blue-500"
+                      )}>
+                        {count}
+                      </h4>
+                      <span className="text-[10px] text-gray-400 font-medium block mt-0.5">
+                        {isSelected ? 'Click to show all' : 'Click to filter'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-            <Card className="border-0 shadow-lg rounded-3xl overflow-hidden bg-white">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs md:text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-400 font-bold border-b border-gray-100">
-                      <th className="p-4 pl-6">Company</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4">Contact Method</th>
-                      <th className="p-4">Assigned Manager</th>
-                      
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 font-medium">
-                    {companies.length > 0 ? (
-                      companies.map((company) => (
-                        <tr key={company.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="p-4 pl-6 font-bold text-text">{company.name}</td>
-                          <td className="p-4">
-                            <Badge variant={
-                              company.status === 'signed' ? 'success' :
-                              company.status === 'contacted' ? 'default' :
-                              company.status === 'pending' ? 'outline' : 'error'
-                            } className="capitalize">
-                              {company.status}
-                            </Badge>
-                          </td>
-                          <td className="p-4 text-gray-500 capitalize">{company.contactMethod || 'Email'}</td>
-                          <td className="p-4 text-gray-500">{company.assignedTo}</td>
-                         
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-400">No sponsorship leads assigned.</td>
+              {/* Filter & Search Toolbar */}
+              <div className="bg-white p-3 md:p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search contacts by company, manager, notes..."
+                    value={sponsorSearch}
+                    onChange={(e) => setSponsorSearch(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 text-xs md:text-sm rounded-xl border border-gray-200 focus:border-primary outline-none transition-all bg-gray-50/50 focus:bg-white"
+                  />
+                  {sponsorSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setSponsorSearch('')}
+                      className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Select Dropdowns */}
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <select
+                    value={sponsorStatusFilter}
+                    onChange={(e) => setSponsorStatusFilter(e.target.value)}
+                    className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 outline-none focus:border-primary cursor-pointer flex-1 sm:flex-none"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="pending">Pending</option>
+                    <option value="signed">Signed</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+
+                  <select
+                    value={sponsorMethodFilter}
+                    onChange={(e) => setSponsorMethodFilter(e.target.value)}
+                    className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 outline-none focus:border-primary cursor-pointer capitalize flex-1 sm:flex-none"
+                  >
+                    <option value="all">All Methods</option>
+                    <option value="call">Call</option>
+                    <option value="email">Email</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="outing">Outing</option>
+                    <option value="social_media">Social Media</option>
+                  </select>
+
+                  {uniqueManagers.length > 1 && (
+                    <select
+                      value={sponsorManagerFilter}
+                      onChange={(e) => setSponsorManagerFilter(e.target.value)}
+                      className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 outline-none focus:border-primary cursor-pointer flex-1 sm:flex-none"
+                    >
+                      <option value="all">All Managers</option>
+                      {uniqueManagers.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  )}
+
+                  {hasActiveFilters && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSponsorSearch('');
+                        setSponsorStatusFilter('all');
+                        setSponsorMethodFilter('all');
+                        setSponsorManagerFilter('all');
+                      }}
+                      className="h-9 px-3 text-xs text-rose-500 border-rose-200 hover:bg-rose-50 rounded-xl whitespace-nowrap"
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Table Card */}
+              <Card className="border-0 shadow-lg rounded-2xl md:rounded-3xl overflow-hidden bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs md:text-sm">
+                    <thead>
+                      <tr className="bg-gray-50/80 text-gray-500 font-bold border-b border-gray-100 uppercase tracking-wider text-[11px]">
+                        <th className="p-4 pl-6">Company</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Contact Method</th>
+                        <th className="p-4">Assigned Manager</th>
+                        <th className="p-4 pr-6">Notes</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
-        )}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 font-medium">
+                      {paginatedCompanies.length > 0 ? (
+                        paginatedCompanies.map((company) => (
+                          <tr key={company.id} className="hover:bg-primary/[0.02] transition-colors group">
+                            <td className="p-4 pl-6 font-bold text-text">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                                  {company.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="truncate max-w-[180px] md:max-w-xs">{company.name}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <Badge variant={
+                                company.status === 'signed' ? 'success' :
+                                company.status === 'contacted' ? 'default' :
+                                company.status === 'pending' ? 'warning' : 'error'
+                              } className="capitalize text-[10px] font-bold px-2 py-0.5">
+                                {company.status}
+                              </Badge>
+                            </td>
+                            <td className="p-4">
+                              {getContactMethodBadge(company.contactMethod)}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[9px] font-bold text-gray-600 shrink-0">
+                                  {(company.assignedTo || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-gray-600 text-xs truncate max-w-[130px]">{company.assignedTo}</span>
+                              </div>
+                            </td>
+                            <td className="p-4 pr-6 text-gray-400 text-xs italic">
+                              <span className="line-clamp-1 max-w-[200px]" title={company.notes || ''}>
+                                {company.notes || '-'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="p-12 text-center text-gray-400">
+                            <Building2 size={36} className="mx-auto opacity-20 mb-2" />
+                            <p className="text-sm font-medium">No contacts match your filters</p>
+                            <p className="text-xs text-gray-400 mt-1">Try clearing some filters or searching for something else.</p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination (20 per page) */}
+                <div className="flex p-3 md:p-4 border-t border-gray-100 flex-col sm:flex-row justify-between items-center gap-3 bg-gray-50/50">
+                  <span className="text-xs md:text-sm text-gray-500 font-medium text-center sm:text-left">
+                    Showing <span className="text-text font-semibold">{filteredCompanies.length > 0 ? sponsorStartIndex + 1 : 0}</span>-
+                    <span className="text-text font-semibold">{sponsorEndIndex}</span> of <span className="text-text font-semibold">{filteredCompanies.length}</span> contacts
+                  </span>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <span className="text-xs text-gray-500 mr-2 hidden sm:inline">
+                      Page <span className="font-semibold text-gray-700">{safeSponsorPage}</span> of <span className="font-semibold text-gray-700">{sponsorTotalPages}</span>
+                    </span>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safeSponsorPage <= 1}
+                      onClick={() => setSponsorPage(p => Math.max(p - 1, 1))}
+                      className="flex-1 sm:flex-none text-xs rounded-lg h-8 px-3"
+                    >
+                      Prev
+                    </Button>
+
+                    <span className="text-xs text-gray-600 font-medium sm:hidden">
+                      {safeSponsorPage} / {sponsorTotalPages}
+                    </span>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safeSponsorPage >= sponsorTotalPages}
+                      onClick={() => setSponsorPage(p => Math.min(p + 1, sponsorTotalPages))}
+                      className="flex-1 sm:flex-none text-xs rounded-lg h-8 px-3"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          );
+        })()}
 
         {/* TAB 3: LOGISTICS */}
         {activeTab === 'logistics' && (() => {
